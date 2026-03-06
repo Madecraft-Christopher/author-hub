@@ -11,7 +11,7 @@ export default function AddAuthorModal({ stages, onAdd, onClose }) {
     courseTitle: "",
     email: "",
     linkedin: "",
-    stage: "prospecting",
+    stage: "recruiting",
     lastContact: new Date().toISOString().split("T")[0],
     notes: "",
   });
