@@ -18,52 +18,72 @@ const SAMPLE_AUTHORS = [
   {
     id: 1,
     name: "Sarah Mitchell",
-    project: "The Future of Remote Work",
+    authorId: "AUTH-001",
+    title: "Senior UX Designer at Acme Studio",
+    courseId: "CRS-101",
+    courseTitle: "UX Design Fundamentals",
     stage: "in_progress",
     lastContact: "2026-03-04",
     email: "sarah@example.com",
-    notes: "Chapter 3 draft submitted. Waiting on revisions.",
-    tags: ["Business", "Leadership"],
+    linkedin: "https://linkedin.com/in/sarahmitchell",
+    notes: "Module 3 draft submitted. Waiting on revisions.",
+    pastCourses: ["Intro to Design Thinking"],
   },
   {
     id: 2,
     name: "James Okafor",
-    project: "Deep Learning for Everyone",
+    authorId: "AUTH-002",
+    title: "ML Engineer at DataCo",
+    courseId: "CRS-204",
+    courseTitle: "Deep Learning for Everyone",
     stage: "review",
     lastContact: "2026-03-05",
     email: "james@example.com",
-    notes: "Final manuscript in review. Cover design approved.",
-    tags: ["Tech", "AI"],
+    linkedin: "https://linkedin.com/in/jamesokafor",
+    notes: "Final content in review. Assessments approved.",
+    pastCourses: ["Python for Beginners", "Data Science Essentials"],
   },
   {
     id: 3,
     name: "Priya Nair",
-    project: "Mindful Leadership",
+    authorId: "AUTH-003",
+    title: "Leadership Coach & Speaker",
+    courseId: "CRS-310",
+    courseTitle: "Mindful Leadership",
     stage: "contract",
     lastContact: "2026-02-28",
     email: "priya@example.com",
+    linkedin: "https://linkedin.com/in/priyanair",
     notes: "Contract sent. Awaiting signature.",
-    tags: ["Leadership", "Wellness"],
+    pastCourses: [],
   },
   {
     id: 4,
     name: "Marcus Webb",
-    project: "The Data-Driven Startup",
+    authorId: "AUTH-004",
+    title: "Startup Founder & Growth Advisor",
+    courseId: "",
+    courseTitle: "",
     stage: "outreach",
     lastContact: "2026-03-01",
     email: "marcus@example.com",
-    notes: "Initial email sent. No response yet.",
-    tags: ["Business", "Data"],
+    linkedin: "https://linkedin.com/in/marcuswebb",
+    notes: "Initial outreach sent. No response yet.",
+    pastCourses: [],
   },
   {
     id: 5,
     name: "Elena Vasquez",
-    project: "Building Resilient Teams",
+    authorId: "AUTH-005",
+    title: "Head of People Operations",
+    courseId: "CRS-415",
+    courseTitle: "Building Resilient Teams",
     stage: "published",
     lastContact: "2026-02-15",
     email: "elena@example.com",
-    notes: "Book live on all platforms. Marketing phase complete.",
-    tags: ["Leadership", "HR"],
+    linkedin: "https://linkedin.com/in/elenavasquez",
+    notes: "Course live on platform. Marketing phase complete.",
+    pastCourses: ["HR Fundamentals", "Talent Acquisition Strategies"],
   },
 ];
 
@@ -77,7 +97,8 @@ export default function Home() {
     const matchesStage = filterStage === "all" || a.stage === filterStage;
     const matchesSearch =
       a.name.toLowerCase().includes(search.toLowerCase()) ||
-      a.project.toLowerCase().includes(search.toLowerCase());
+      (a.courseTitle || "").toLowerCase().includes(search.toLowerCase()) ||
+      (a.authorId || "").toLowerCase().includes(search.toLowerCase());
     return matchesStage && matchesSearch;
   });
 
@@ -169,7 +190,7 @@ export default function Home() {
       <div className="px-6 pt-5 pb-3">
         <input
           type="text"
-          placeholder="Search authors or projects..."
+          placeholder="Search by name, course, or author ID..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           className="w-full max-w-md border border-slate-200 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"

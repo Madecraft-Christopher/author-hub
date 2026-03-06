@@ -8,8 +8,10 @@ export default function AuthorCard({ author, stages, onUpdate, onDelete }) {
   const [noteDraft, setNoteDraft] = useState(author.notes);
 
   const stage = stages.find((s) => s.id === author.stage);
+  const stageIndex = stages.findIndex((s) => s.id === author.stage);
 
   const daysSince = (dateStr) => {
+    if (!dateStr) return "—";
     const diff = Date.now() - new Date(dateStr).getTime();
     const days = Math.floor(diff / (1000 * 60 * 60 * 24));
     if (days === 0) return "Today";
@@ -17,30 +19,46 @@ export default function AuthorCard({ author, stages, onUpdate, onDelete }) {
     return `${days}d ago`;
   };
 
-  const stageIndex = stages.findIndex((s) => s.id === author.stage);
-
   return (
     <div className="bg-white rounded-xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow flex flex-col">
       {/* Stage color bar */}
       <div className={`h-1.5 rounded-t-xl ${stage?.color || "bg-slate-300"}`} />
 
       <div className="p-4 flex flex-col gap-3 flex-1">
-        {/* Author name + stage badge */}
+
+        {/* Name + Stage badge */}
         <div className="flex items-start justify-between gap-2">
           <div>
             <h2 className="font-semibold text-slate-900 text-base leading-snug">
               {author.name}
             </h2>
-            <p className="text-xs text-slate-500 mt-0.5 leading-tight">
-              {author.project}
-            </p>
+            {author.title && (
+              <p className="text-xs text-slate-400 mt-0.5 leading-tight">
+                {author.title}
+              </p>
+            )}
           </div>
           <span
-            className={`text-white text-xs font-medium px-2 py-0.5 rounded-full whitespace-nowrap ${stage?.color || "bg-slate-400"}`}
+            className={`text-white text-xs font-medium px-2 py-0.5 rounded-full whitespace-nowrap shrink-0 ${stage?.color || "bg-slate-400"}`}
           >
             {stage?.label || author.stage}
           </span>
         </div>
+
+        {/* IDs */}
+        {(author.authorId || author.courseId) && (
+          <div className="flex gap-3 text-xs text-slate-400">
+            {author.authorId && <span>Author: <span className="text-slate-600 font-medium">{author.authorId}</span></span>}
+            {author.courseId && <span>Course: <span className="text-slate-600 font-medium">{author.courseId}</span></span>}
+          </div>
+        )}
+
+        {/* Course Title */}
+        {author.courseTitle && (
+          <div className="text-xs text-slate-600 bg-slate-50 rounded-lg px-2.5 py-1.5 font-medium">
+            {author.courseTitle}
+          </div>
+        )}
 
         {/* Mini pipeline progress */}
         <div className="flex items-center gap-0.5">
@@ -54,30 +72,45 @@ export default function AuthorCard({ author, stages, onUpdate, onDelete }) {
           ))}
         </div>
 
-        {/* Meta info */}
+        {/* Contact links + last contact */}
         <div className="flex items-center justify-between text-xs text-slate-400">
           <span>Last contact: {daysSince(author.lastContact)}</span>
-          {author.email && (
-            <a
-              href={`mailto:${author.email}`}
-              className="text-blue-500 hover:underline"
-            >
-              Email
-            </a>
-          )}
+          <div className="flex gap-2">
+            {author.email && (
+              <a
+                href={`mailto:${author.email}`}
+                className="text-blue-500 hover:underline"
+              >
+                Email
+              </a>
+            )}
+            {author.linkedin && (
+              <a
+                href={author.linkedin}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-blue-700 hover:underline"
+              >
+                LinkedIn
+              </a>
+            )}
+          </div>
         </div>
 
-        {/* Tags */}
-        {author.tags?.length > 0 && (
-          <div className="flex flex-wrap gap-1">
-            {author.tags.map((tag) => (
-              <span
-                key={tag}
-                className="text-xs bg-slate-100 text-slate-500 px-2 py-0.5 rounded-full"
-              >
-                {tag}
-              </span>
-            ))}
+        {/* Past courses */}
+        {author.pastCourses?.length > 0 && (
+          <div className="flex flex-col gap-1">
+            <span className="text-xs text-slate-400 font-medium">Past courses:</span>
+            <div className="flex flex-wrap gap-1">
+              {author.pastCourses.map((course) => (
+                <span
+                  key={course}
+                  className="text-xs bg-blue-50 text-blue-700 px-2 py-0.5 rounded-full"
+                >
+                  {course}
+                </span>
+              ))}
+            </div>
           </div>
         )}
 
@@ -126,7 +159,7 @@ export default function AuthorCard({ author, stages, onUpdate, onDelete }) {
           )}
         </div>
 
-        {/* Expand / Actions */}
+        {/* Actions toggle */}
         <div className="flex items-center justify-between pt-1">
           <button
             onClick={() => setExpanded(!expanded)}
@@ -138,9 +171,7 @@ export default function AuthorCard({ author, stages, onUpdate, onDelete }) {
 
         {expanded && (
           <div className="border-t border-slate-100 pt-3 flex flex-col gap-2">
-            <label className="text-xs font-medium text-slate-500">
-              Move stage
-            </label>
+            <label className="text-xs font-medium text-slate-500">Move stage</label>
             <select
               value={author.stage}
               onChange={(e) => onUpdate(author.id, { stage: e.target.value })}
@@ -159,9 +190,7 @@ export default function AuthorCard({ author, stages, onUpdate, onDelete }) {
             <input
               type="date"
               value={author.lastContact}
-              onChange={(e) =>
-                onUpdate(author.id, { lastContact: e.target.value })
-              }
+              onChange={(e) => onUpdate(author.id, { lastContact: e.target.value })}
               className="text-xs border border-slate-200 rounded-lg px-2 py-1.5 focus:outline-none focus:ring-1 focus:ring-blue-400 bg-white"
             />
 
