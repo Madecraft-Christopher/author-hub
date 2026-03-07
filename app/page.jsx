@@ -3,6 +3,7 @@
 import { useState } from "react";
 import AuthorCard from "../components/AuthorCard";
 import AddAuthorModal from "../components/AddAuthorModal";
+import AGCLifecycle from "../components/AGCLifecycle";
 
 const STAGES = [
   { id: "recruiting",         label: "Recruiting",                  color: "bg-slate-400" },
@@ -91,7 +92,13 @@ const SAMPLE_AUTHORS = [
   },
 ];
 
+const TABS = [
+  { id: "process", label: "Process Map" },
+  { id: "authors", label: "Authors" },
+];
+
 export default function Home() {
+  const [activeTab, setActiveTab] = useState("process");
   const [authors, setAuthors] = useState(SAMPLE_AUTHORS);
   const [filterStage, setFilterStage] = useState("all");
   const [search, setSearch] = useState("");
@@ -109,17 +116,12 @@ export default function Home() {
   const stageCount = (stageId) => authors.filter((a) => a.stage === stageId).length;
 
   const handleAdd = (newAuthor) => {
-    setAuthors((prev) => [
-      ...prev,
-      { ...newAuthor, id: Date.now() },
-    ]);
+    setAuthors((prev) => [...prev, { ...newAuthor, id: Date.now() }]);
     setShowModal(false);
   };
 
   const handleUpdate = (id, updates) => {
-    setAuthors((prev) =>
-      prev.map((a) => (a.id === id ? { ...a, ...updates } : a))
-    );
+    setAuthors((prev) => prev.map((a) => (a.id === id ? { ...a, ...updates } : a)));
   };
 
   const handleDelete = (id) => {
@@ -127,104 +129,143 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50">
-      {/* Header */}
-      <header className="bg-white border-b border-slate-200 px-6 py-4 flex items-center justify-between shadow-sm">
+    <div className="min-h-screen bg-slate-50 flex flex-col">
+
+      {/* ── Top Header ── */}
+      <header className="bg-white border-b border-slate-200 px-6 py-4 flex items-center justify-between shadow-sm shrink-0">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900 tracking-tight">
-            Author Hub
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-semibold tracking-widest text-slate-400 uppercase">Madecraft</span>
+            <span className="w-1 h-1 rounded-full bg-slate-300 inline-block" />
+            <span className="text-xs font-medium tracking-widest text-blue-600 uppercase">Author Hub</span>
+          </div>
+          <h1 className="text-xl font-bold text-slate-900 tracking-tight mt-0.5">
+            AGC Remote Author Lifecycle
           </h1>
-          <p className="text-sm text-slate-500 mt-0.5">
-            Track every author through your publishing process
+          <p className="text-xs text-slate-400 mt-0.5">
+            End-to-end author management — from recruiting through final delivery
           </p>
         </div>
-        <button
-          onClick={() => setShowModal(true)}
-          className="bg-brand-600 hover:bg-brand-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
-          style={{ backgroundColor: "#3b5bdb" }}
-          onMouseEnter={(e) => (e.target.style.backgroundColor = "#2f4ac0")}
-          onMouseLeave={(e) => (e.target.style.backgroundColor = "#3b5bdb")}
-        >
-          + Add Author
-        </button>
+
+        {activeTab === "authors" && (
+          <button
+            onClick={() => setShowModal(true)}
+            className="text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors shrink-0"
+            style={{ backgroundColor: "#3b5bdb" }}
+            onMouseEnter={(e) => (e.target.style.backgroundColor = "#2f4ac0")}
+            onMouseLeave={(e) => (e.target.style.backgroundColor = "#3b5bdb")}
+          >
+            + Add Author
+          </button>
+        )}
       </header>
 
-      {/* Pipeline Status Bar */}
-      <div className="bg-white border-b border-slate-200 px-6 py-3">
-        <div className="flex items-center gap-1 overflow-x-auto">
-          <button
-            onClick={() => setFilterStage("all")}
-            className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-all ${
-              filterStage === "all"
-                ? "bg-slate-900 text-white"
-                : "bg-slate-100 text-slate-600 hover:bg-slate-200"
-            }`}
-          >
-            All
-            <span className="bg-white bg-opacity-20 text-inherit px-1.5 py-0.5 rounded-full text-xs">
-              {authors.length}
-            </span>
-          </button>
-
-          {STAGES.map((stage, i) => (
-            <div key={stage.id} className="flex items-center">
-              {i > 0 && (
-                <span className="text-slate-300 mx-1 text-lg select-none">›</span>
-              )}
-              <button
-                onClick={() => setFilterStage(stage.id)}
-                className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-all ${
-                  filterStage === stage.id
-                    ? "bg-slate-900 text-white"
-                    : "bg-slate-100 text-slate-600 hover:bg-slate-200"
-                }`}
-              >
-                <span className={`w-2 h-2 rounded-full ${stage.color}`} />
-                {stage.label}
-                <span className="bg-white bg-opacity-20 text-inherit px-1.5 py-0.5 rounded-full text-xs">
-                  {stageCount(stage.id)}
-                </span>
-              </button>
-            </div>
+      {/* ── Tab Bar ── */}
+      <div className="bg-white border-b border-slate-200 px-6 shrink-0">
+        <div className="flex gap-1">
+          {TABS.map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={`px-5 py-3 text-sm font-medium border-b-2 transition-all ${
+                activeTab === tab.id
+                  ? "border-blue-600 text-blue-600"
+                  : "border-transparent text-slate-500 hover:text-slate-700"
+              }`}
+            >
+              {tab.label}
+            </button>
           ))}
         </div>
       </div>
 
-      {/* Search */}
-      <div className="px-6 pt-5 pb-3">
-        <input
-          type="text"
-          placeholder="Search by name, course, or author ID..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="w-full max-w-md border border-slate-200 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
-        />
-        <p className="text-xs text-slate-400 mt-2">
-          Showing {filtered.length} of {authors.length} authors
-        </p>
-      </div>
+      {/* ── Tab Content ── */}
+      <div className="flex-1 overflow-auto">
 
-      {/* Author Cards Grid */}
-      <main className="px-6 pb-10">
-        {filtered.length === 0 ? (
-          <div className="text-center py-20 text-slate-400">
-            <p className="text-lg">No authors found.</p>
-            <p className="text-sm mt-1">Try a different filter or add a new author.</p>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-            {filtered.map((author) => (
-              <AuthorCard
-                key={author.id}
-                author={author}
-                stages={STAGES}
-                onUpdate={handleUpdate}
-                onDelete={handleDelete}
+        {/* Process Map Tab */}
+        {activeTab === "process" && <AGCLifecycle />}
+
+        {/* Authors Tab */}
+        {activeTab === "authors" && (
+          <div className="flex flex-col">
+
+            {/* Pipeline filter bar */}
+            <div className="bg-white border-b border-slate-200 px-6 py-3 shrink-0">
+              <div className="flex items-center gap-1 overflow-x-auto">
+                <button
+                  onClick={() => setFilterStage("all")}
+                  className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-all ${
+                    filterStage === "all"
+                      ? "bg-slate-900 text-white"
+                      : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                  }`}
+                >
+                  All
+                  <span className="px-1.5 py-0.5 rounded-full text-xs bg-slate-700 text-white">
+                    {authors.length}
+                  </span>
+                </button>
+
+                {STAGES.map((stage, i) => (
+                  <div key={stage.id} className="flex items-center">
+                    {i > 0 && <span className="text-slate-300 mx-1 text-lg select-none">›</span>}
+                    <button
+                      onClick={() => setFilterStage(stage.id)}
+                      className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-all ${
+                        filterStage === stage.id
+                          ? "bg-slate-900 text-white"
+                          : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                      }`}
+                    >
+                      <span className={`w-2 h-2 rounded-full ${stage.color}`} />
+                      {stage.label}
+                      <span className="px-1.5 py-0.5 rounded-full text-xs bg-slate-200 text-slate-600">
+                        {stageCount(stage.id)}
+                      </span>
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Search */}
+            <div className="px-6 pt-5 pb-3">
+              <input
+                type="text"
+                placeholder="Search by name, course, or author ID..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="w-full max-w-md border border-slate-200 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
               />
-            ))}
+              <p className="text-xs text-slate-400 mt-2">
+                Showing {filtered.length} of {authors.length} authors
+              </p>
+            </div>
+
+            {/* Author Cards */}
+            <main className="px-6 pb-10">
+              {filtered.length === 0 ? (
+                <div className="text-center py-20 text-slate-400">
+                  <p className="text-lg">No authors found.</p>
+                  <p className="text-sm mt-1">Try a different filter or add a new author.</p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                  {filtered.map((author) => (
+                    <AuthorCard
+                      key={author.id}
+                      author={author}
+                      stages={STAGES}
+                      onUpdate={handleUpdate}
+                      onDelete={handleDelete}
+                    />
+                  ))}
+                </div>
+              )}
+            </main>
           </div>
         )}
-      </main>
+      </div>
 
       {showModal && (
         <AddAuthorModal
