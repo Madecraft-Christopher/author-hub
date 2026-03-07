@@ -2,6 +2,39 @@
 
 import { useState } from "react";
 
+const inputStyle = {
+  background: "var(--bg-surface)",
+  border: "1px solid var(--border)",
+  borderRadius: 8,
+  padding: "10px 14px",
+  fontSize: 13,
+  color: "var(--text-primary)",
+  width: "100%",
+  outline: "none",
+  fontFamily: "var(--font-inter), sans-serif",
+  transition: "border-color 0.15s",
+};
+
+const labelStyle = {
+  fontSize: 10,
+  fontWeight: 700,
+  letterSpacing: "0.1em",
+  textTransform: "uppercase",
+  color: "var(--text-muted)",
+  fontFamily: "var(--font-inter), sans-serif",
+};
+
+function Field({ label, required, children }) {
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+      <label style={labelStyle}>
+        {label} {required && <span style={{ color: "var(--accent-coral)" }}>*</span>}
+      </label>
+      {children}
+    </div>
+  );
+}
+
 export default function AddAuthorModal({ stages, onAdd, onClose }) {
   const [form, setForm] = useState({
     name: "",
@@ -22,14 +55,8 @@ export default function AddAuthorModal({ stages, onAdd, onClose }) {
 
   const addCourse = () => {
     const val = courseInput.trim();
-    if (val && !pastCourses.includes(val)) {
-      setPastCourses((prev) => [...prev, val]);
-    }
+    if (val && !pastCourses.includes(val)) setPastCourses((p) => [...p, val]);
     setCourseInput("");
-  };
-
-  const removeCourse = (course) => {
-    setPastCourses((prev) => prev.filter((c) => c !== course));
   };
 
   const handleSubmit = (e) => {
@@ -38,232 +65,207 @@ export default function AddAuthorModal({ stages, onAdd, onClose }) {
     onAdd({ ...form, pastCourses });
   };
 
+  const focusIn  = (e) => (e.target.style.borderColor = "var(--accent-coral)");
+  const focusOut = (e) => (e.target.style.borderColor = "var(--border)");
+
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-2xl shadow-xl w-full max-w-lg flex flex-col max-h-[90vh]">
-        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 shrink-0">
-          <h2 className="text-lg font-semibold text-slate-900">Add New Author</h2>
+    <div style={{
+      position: "fixed", inset: 0,
+      background: "rgba(0,0,0,0.7)",
+      display: "flex", alignItems: "center", justifyContent: "center",
+      zIndex: 50, padding: 16,
+    }}>
+      <div style={{
+        background: "var(--bg-secondary)",
+        border: "1px solid var(--border)",
+        borderRadius: 14,
+        width: "100%",
+        maxWidth: 520,
+        maxHeight: "90vh",
+        display: "flex",
+        flexDirection: "column",
+        boxShadow: "0 24px 80px rgba(0,0,0,0.6)",
+      }}>
+        {/* Modal header */}
+        <div style={{
+          display: "flex", alignItems: "center", justifyContent: "space-between",
+          padding: "20px 24px",
+          borderBottom: "1px solid var(--border)",
+          flexShrink: 0,
+        }}>
+          <div>
+            <h2 style={{
+              fontFamily: "var(--font-playfair), Georgia, serif",
+              fontSize: 22,
+              fontWeight: 700,
+              color: "var(--text-primary)",
+              margin: 0,
+            }}>
+              Add New Author
+            </h2>
+            <p style={{ fontSize: 11, color: "var(--text-muted)", marginTop: 4 }}>
+              <span style={{ color: "var(--accent-coral)" }}>*</span> Name, email, and LinkedIn are required
+            </p>
+          </div>
           <button
             onClick={onClose}
-            className="text-slate-400 hover:text-slate-600 text-xl leading-none"
-          >
-            ×
-          </button>
+            style={{
+              background: "none", border: "none",
+              color: "var(--text-muted)", fontSize: 22, cursor: "pointer",
+              lineHeight: 1, padding: 4,
+            }}
+          >×</button>
         </div>
 
-        <form
-          onSubmit={handleSubmit}
-          className="px-6 py-5 flex flex-col gap-4 overflow-y-auto"
-        >
+        {/* Form */}
+        <form onSubmit={handleSubmit} style={{ padding: "20px 24px", display: "flex", flexDirection: "column", gap: 16, overflowY: "auto" }}>
+
           {/* Name + Author ID */}
-          <div className="grid grid-cols-2 gap-3">
-            <div className="flex flex-col gap-1">
-              <label className="text-xs font-medium text-slate-500">
-                Name <span className="text-red-400">*</span>
-              </label>
-              <input
-                type="text"
-                required
-                value={form.name}
-                onChange={set("name")}
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+            <Field label="Name" required>
+              <input type="text" required value={form.name} onChange={set("name")}
                 placeholder="e.g. Jane Smith"
-                className="border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
-              />
-            </div>
-            <div className="flex flex-col gap-1">
-              <label className="text-xs font-medium text-slate-500">
-                Author ID
-              </label>
-              <input
-                type="text"
-                value={form.authorId}
-                onChange={set("authorId")}
-                placeholder="e.g. AUTH-001"
-                className="border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
-              />
-            </div>
+                style={inputStyle} onFocus={focusIn} onBlur={focusOut} />
+            </Field>
+            <Field label="Author ID">
+              <input type="text" value={form.authorId} onChange={set("authorId")}
+                placeholder="e.g. AUTH-006"
+                style={inputStyle} onFocus={focusIn} onBlur={focusOut} />
+            </Field>
           </div>
 
-          {/* Professional Title */}
-          <div className="flex flex-col gap-1">
-            <label className="text-xs font-medium text-slate-500">
-              Title / Role
-            </label>
-            <input
-              type="text"
-              value={form.title}
-              onChange={set("title")}
-              placeholder="e.g. Senior Data Scientist at Acme Corp"
-              className="border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
-            />
-          </div>
+          {/* Title */}
+          <Field label="Title / Role">
+            <input type="text" value={form.title} onChange={set("title")}
+              placeholder="e.g. Senior Data Scientist at Acme"
+              style={inputStyle} onFocus={focusIn} onBlur={focusOut} />
+          </Field>
 
-          {/* Course ID + Course Title */}
-          <div className="grid grid-cols-2 gap-3">
-            <div className="flex flex-col gap-1">
-              <label className="text-xs font-medium text-slate-500">
-                Course ID
-              </label>
-              <input
-                type="text"
-                value={form.courseId}
-                onChange={set("courseId")}
-                placeholder="e.g. CRS-204"
-                className="border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
-              />
-            </div>
-            <div className="flex flex-col gap-1">
-              <label className="text-xs font-medium text-slate-500">
-                Course Title
-              </label>
-              <input
-                type="text"
-                value={form.courseTitle}
-                onChange={set("courseTitle")}
+          {/* Course ID + Title */}
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+            <Field label="Course ID">
+              <input type="text" value={form.courseId} onChange={set("courseId")}
+                placeholder="e.g. CRS-207"
+                style={inputStyle} onFocus={focusIn} onBlur={focusOut} />
+            </Field>
+            <Field label="Course Title">
+              <input type="text" value={form.courseTitle} onChange={set("courseTitle")}
                 placeholder="e.g. Intro to Python"
-                className="border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
-              />
-            </div>
+                style={inputStyle} onFocus={focusIn} onBlur={focusOut} />
+            </Field>
           </div>
 
           {/* Email */}
-          <div className="flex flex-col gap-1">
-            <label className="text-xs font-medium text-slate-500">
-              Email <span className="text-red-400">*</span>
-            </label>
-            <input
-              type="email"
-              required
-              value={form.email}
-              onChange={set("email")}
+          <Field label="Email" required>
+            <input type="email" required value={form.email} onChange={set("email")}
               placeholder="jane@email.com"
-              className="border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
-            />
-          </div>
+              style={inputStyle} onFocus={focusIn} onBlur={focusOut} />
+          </Field>
 
           {/* LinkedIn */}
-          <div className="flex flex-col gap-1">
-            <label className="text-xs font-medium text-slate-500">
-              LinkedIn / Social Media <span className="text-red-400">*</span>
-            </label>
-            <input
-              type="url"
-              required
-              value={form.linkedin}
-              onChange={set("linkedin")}
+          <Field label="LinkedIn / Social Media" required>
+            <input type="url" required value={form.linkedin} onChange={set("linkedin")}
               placeholder="https://linkedin.com/in/janesmith"
-              className="border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
-            />
-          </div>
+              style={inputStyle} onFocus={focusIn} onBlur={focusOut} />
+          </Field>
 
           {/* Stage + Last Contact */}
-          <div className="grid grid-cols-2 gap-3">
-            <div className="flex flex-col gap-1">
-              <label className="text-xs font-medium text-slate-500">Stage</label>
-              <select
-                value={form.stage}
-                onChange={set("stage")}
-                className="border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 bg-white"
-              >
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+            <Field label="Stage">
+              <select value={form.stage} onChange={set("stage")}
+                style={{ ...inputStyle, cursor: "pointer" }} onFocus={focusIn} onBlur={focusOut}>
                 {stages.map((s) => (
-                  <option key={s.id} value={s.id}>
-                    {s.label}
-                  </option>
+                  <option key={s.id} value={s.id} style={{ background: "var(--bg-secondary)" }}>{s.label}</option>
                 ))}
               </select>
-            </div>
-            <div className="flex flex-col gap-1">
-              <label className="text-xs font-medium text-slate-500">
-                Last Contact
-              </label>
-              <input
-                type="date"
-                value={form.lastContact}
-                onChange={set("lastContact")}
-                className="border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
-              />
-            </div>
+            </Field>
+            <Field label="Last Contact">
+              <input type="date" value={form.lastContact} onChange={set("lastContact")}
+                style={inputStyle} onFocus={focusIn} onBlur={focusOut} />
+            </Field>
           </div>
 
-          {/* Past Courses Completed */}
-          <div className="flex flex-col gap-1">
-            <label className="text-xs font-medium text-slate-500">
-              Past Courses Completed
-            </label>
-            <div className="flex gap-2">
+          {/* Past courses */}
+          <Field label="Past Courses Completed">
+            <div style={{ display: "flex", gap: 8 }}>
               <input
                 type="text"
                 value={courseInput}
                 onChange={(e) => setCourseInput(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") {
-                    e.preventDefault();
-                    addCourse();
-                  }
-                }}
+                onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); addCourse(); } }}
                 placeholder="Type a course title and press Add"
-                className="flex-1 border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+                style={{ ...inputStyle, flex: 1 }}
+                onFocus={focusIn} onBlur={focusOut}
               />
-              <button
-                type="button"
-                onClick={addCourse}
-                className="px-3 py-2 text-sm rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 transition-colors whitespace-nowrap"
-              >
-                + Add
-              </button>
+              <button type="button" onClick={addCourse} style={{
+                background: "var(--bg-surface)",
+                border: "1px solid var(--border)",
+                borderRadius: 8,
+                padding: "0 16px",
+                fontSize: 12,
+                color: "var(--text-body)",
+                cursor: "pointer",
+                whiteSpace: "nowrap",
+                fontFamily: "var(--font-inter), sans-serif",
+              }}>+ Add</button>
             </div>
             {pastCourses.length > 0 && (
-              <div className="flex flex-wrap gap-1.5 mt-1.5">
-                {pastCourses.map((course) => (
-                  <span
-                    key={course}
-                    className="flex items-center gap-1 bg-blue-50 text-blue-700 text-xs px-2 py-1 rounded-full"
-                  >
-                    {course}
-                    <button
-                      type="button"
-                      onClick={() => removeCourse(course)}
-                      className="text-blue-400 hover:text-blue-700 leading-none"
-                    >
-                      ×
-                    </button>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: 8 }}>
+                {pastCourses.map((c) => (
+                  <span key={c} style={{
+                    display: "flex", alignItems: "center", gap: 4,
+                    background: "var(--bg-surface)",
+                    border: "1px solid var(--border)",
+                    borderRadius: 12,
+                    padding: "3px 10px",
+                    fontSize: 11,
+                    color: "var(--accent-gold)",
+                  }}>
+                    {c}
+                    <button type="button" onClick={() => setPastCourses((p) => p.filter((x) => x !== c))}
+                      style={{ background: "none", border: "none", color: "var(--text-muted)", cursor: "pointer", padding: 0, fontSize: 14, lineHeight: 1 }}>×</button>
                   </span>
                 ))}
               </div>
             )}
-          </div>
+          </Field>
 
           {/* Notes */}
-          <div className="flex flex-col gap-1">
-            <label className="text-xs font-medium text-slate-500">Notes</label>
-            <textarea
-              value={form.notes}
-              onChange={set("notes")}
-              rows={3}
+          <Field label="Notes">
+            <textarea value={form.notes} onChange={set("notes")} rows={3}
               placeholder="Any initial notes..."
-              className="border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 resize-none"
-            />
-          </div>
+              style={{ ...inputStyle, resize: "none" }}
+              onFocus={focusIn} onBlur={focusOut} />
+          </Field>
 
-          <p className="text-xs text-slate-400">
-            <span className="text-red-400">*</span> Required fields
-          </p>
-
-          <div className="flex gap-3 pt-1">
-            <button
-              type="button"
-              onClick={onClose}
-              className="flex-1 border border-slate-200 text-slate-600 rounded-lg py-2 text-sm font-medium hover:bg-slate-50 transition-colors"
-            >
+          {/* Buttons */}
+          <div style={{ display: "flex", gap: 10, paddingTop: 4 }}>
+            <button type="button" onClick={onClose} style={{
+              flex: 1,
+              background: "none",
+              border: "1px solid var(--border)",
+              borderRadius: "var(--radius-btn)",
+              padding: "11px 0",
+              fontSize: 13,
+              fontWeight: 600,
+              color: "var(--text-muted)",
+              cursor: "pointer",
+              fontFamily: "var(--font-inter), sans-serif",
+            }}>
               Cancel
             </button>
-            <button
-              type="submit"
-              className="flex-1 text-white rounded-lg py-2 text-sm font-medium transition-colors"
-              style={{ backgroundColor: "#3b5bdb" }}
-              onMouseEnter={(e) => (e.target.style.backgroundColor = "#2f4ac0")}
-              onMouseLeave={(e) => (e.target.style.backgroundColor = "#3b5bdb")}
-            >
+            <button type="submit" style={{
+              flex: 1,
+              background: "var(--accent-coral)",
+              border: "none",
+              borderRadius: "var(--radius-btn)",
+              padding: "11px 0",
+              fontSize: 13,
+              fontWeight: 600,
+              color: "#fff",
+              cursor: "pointer",
+              fontFamily: "var(--font-inter), sans-serif",
+            }}>
               Add Author
             </button>
           </div>

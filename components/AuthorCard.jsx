@@ -19,78 +19,116 @@ export default function AuthorCard({ author, stages, onUpdate, onDelete }) {
     return `${days}d ago`;
   };
 
+  const card = {
+    background: "var(--bg-card)",
+    border: "1px solid var(--border)",
+    borderRadius: "var(--radius-card)",
+    overflow: "hidden",
+    display: "flex",
+    flexDirection: "column",
+    transition: "border-color 0.15s",
+  };
+
   return (
-    <div className="bg-white rounded-xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow flex flex-col">
+    <div
+      style={card}
+      onMouseEnter={(e) => (e.currentTarget.style.borderColor = "var(--border-hover)")}
+      onMouseLeave={(e) => (e.currentTarget.style.borderColor = "var(--border)")}
+    >
       {/* Stage color bar */}
-      <div className={`h-1.5 rounded-t-xl ${stage?.color || "bg-slate-300"}`} />
+      <div style={{ height: 4, background: stage?.hex || "var(--border)", width: "100%" }} />
 
-      <div className="p-4 flex flex-col gap-3 flex-1">
+      <div style={{ padding: 16, display: "flex", flexDirection: "column", gap: 12, flex: 1 }}>
 
-        {/* Name + Stage badge */}
-        <div className="flex items-start justify-between gap-2">
+        {/* Name + stage badge */}
+        <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 8 }}>
           <div>
-            <h2 className="font-semibold text-slate-900 text-base leading-snug">
+            <h2 style={{
+              fontFamily: "var(--font-playfair), Georgia, serif",
+              fontSize: 17,
+              fontWeight: 700,
+              color: "var(--text-primary)",
+              margin: 0,
+              lineHeight: 1.2,
+            }}>
               {author.name}
             </h2>
             {author.title && (
-              <p className="text-xs text-slate-400 mt-0.5 leading-tight">
+              <p style={{ fontSize: 11, color: "var(--text-muted)", marginTop: 3, lineHeight: 1.4 }}>
                 {author.title}
               </p>
             )}
           </div>
-          <span
-            className={`text-white text-xs font-medium px-2 py-0.5 rounded-full whitespace-nowrap shrink-0 ${stage?.color || "bg-slate-400"}`}
-          >
+          <span style={{
+            fontSize: 10,
+            fontWeight: 700,
+            letterSpacing: "0.05em",
+            padding: "3px 10px",
+            borderRadius: 20,
+            whiteSpace: "nowrap",
+            flexShrink: 0,
+            background: stage ? `${stage.hex}22` : "var(--border)",
+            color: stage?.hex || "var(--text-muted)",
+            border: `1px solid ${stage?.hex || "var(--border)"}`,
+            fontFamily: "var(--font-inter), sans-serif",
+          }}>
             {stage?.label || author.stage}
           </span>
         </div>
 
         {/* IDs */}
         {(author.authorId || author.courseId) && (
-          <div className="flex gap-3 text-xs text-slate-400">
-            {author.authorId && <span>Author: <span className="text-slate-600 font-medium">{author.authorId}</span></span>}
-            {author.courseId && <span>Course: <span className="text-slate-600 font-medium">{author.courseId}</span></span>}
+          <div style={{ display: "flex", gap: 12, fontSize: 11, color: "var(--text-muted)", fontFamily: "monospace" }}>
+            {author.authorId && <span>{author.authorId}</span>}
+            {author.courseId && <span style={{ color: "var(--accent-gold)" }}>{author.courseId}</span>}
           </div>
         )}
 
-        {/* Course Title */}
+        {/* Course title */}
         {author.courseTitle && (
-          <div className="text-xs text-slate-600 bg-slate-50 rounded-lg px-2.5 py-1.5 font-medium">
+          <div style={{
+            fontSize: 12,
+            fontWeight: 600,
+            color: "var(--text-body)",
+            background: "var(--bg-surface)",
+            borderRadius: 6,
+            padding: "6px 10px",
+            borderLeft: `3px solid ${stage?.hex || "var(--border)"}`,
+          }}>
             {author.courseTitle}
           </div>
         )}
 
-        {/* Mini pipeline progress */}
-        <div className="flex items-center gap-0.5">
+        {/* Pipeline progress */}
+        <div style={{ display: "flex", gap: 2, alignItems: "center" }}>
           {stages.map((s, i) => (
             <div
               key={s.id}
-              className={`h-1.5 flex-1 rounded-full transition-all ${
-                i <= stageIndex ? s.color : "bg-slate-100"
-              }`}
+              title={s.label}
+              style={{
+                flex: 1,
+                height: 4,
+                borderRadius: 2,
+                background: i <= stageIndex ? s.hex : "var(--border)",
+                transition: "background 0.2s",
+              }}
             />
           ))}
         </div>
 
-        {/* Contact links + last contact */}
-        <div className="flex items-center justify-between text-xs text-slate-400">
-          <span>Last contact: {daysSince(author.lastContact)}</span>
-          <div className="flex gap-2">
+        {/* Last contact + links */}
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", fontSize: 11 }}>
+          <span style={{ color: "var(--text-muted)" }}>
+            Last contact: <span style={{ color: "var(--text-body)" }}>{daysSince(author.lastContact)}</span>
+          </span>
+          <div style={{ display: "flex", gap: 10 }}>
             {author.email && (
-              <a
-                href={`mailto:${author.email}`}
-                className="text-blue-500 hover:underline"
-              >
+              <a href={`mailto:${author.email}`} style={{ color: "var(--accent-cyan)", textDecoration: "none", fontSize: 11, fontWeight: 500 }}>
                 Email
               </a>
             )}
             {author.linkedin && (
-              <a
-                href={author.linkedin}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-blue-700 hover:underline"
-              >
+              <a href={author.linkedin} target="_blank" rel="noopener noreferrer" style={{ color: "var(--accent-blue)", textDecoration: "none", fontSize: 11, fontWeight: 500 }}>
                 LinkedIn
               </a>
             )}
@@ -99,15 +137,19 @@ export default function AuthorCard({ author, stages, onUpdate, onDelete }) {
 
         {/* Past courses */}
         {author.pastCourses?.length > 0 && (
-          <div className="flex flex-col gap-1">
-            <span className="text-xs text-slate-400 font-medium">Past courses:</span>
-            <div className="flex flex-wrap gap-1">
-              {author.pastCourses.map((course) => (
-                <span
-                  key={course}
-                  className="text-xs bg-blue-50 text-blue-700 px-2 py-0.5 rounded-full"
-                >
-                  {course}
+          <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+            <span style={{ fontSize: 10, color: "var(--text-muted)", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.08em" }}>Past Courses</span>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
+              {author.pastCourses.map((c) => (
+                <span key={c} style={{
+                  fontSize: 10,
+                  padding: "2px 8px",
+                  borderRadius: 10,
+                  background: "var(--bg-surface)",
+                  color: "var(--accent-gold)",
+                  border: "1px solid var(--border)",
+                }}>
+                  {c}
                 </span>
               ))}
             </div>
@@ -115,90 +157,125 @@ export default function AuthorCard({ author, stages, onUpdate, onDelete }) {
         )}
 
         {/* Notes */}
-        <div className="text-xs text-slate-600 bg-slate-50 rounded-lg p-2.5 min-h-[3rem]">
+        <div style={{
+          fontSize: 12,
+          background: "var(--bg-surface)",
+          borderRadius: 6,
+          padding: "10px 12px",
+          minHeight: 48,
+          color: "var(--text-body)",
+        }}>
           {editingNotes ? (
-            <div className="flex flex-col gap-1.5">
+            <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
               <textarea
-                className="w-full text-xs border border-slate-200 rounded p-1.5 resize-none focus:outline-none focus:ring-1 focus:ring-blue-400"
                 rows={3}
                 value={noteDraft}
                 onChange={(e) => setNoteDraft(e.target.value)}
                 autoFocus
+                style={{
+                  width: "100%",
+                  background: "var(--bg-card)",
+                  border: "1px solid var(--accent-coral)",
+                  borderRadius: 4,
+                  padding: "6px 8px",
+                  fontSize: 12,
+                  color: "var(--text-primary)",
+                  resize: "none",
+                  outline: "none",
+                  fontFamily: "var(--font-inter), sans-serif",
+                }}
               />
-              <div className="flex gap-2">
-                <button
-                  onClick={() => {
-                    onUpdate(author.id, { notes: noteDraft });
-                    setEditingNotes(false);
-                  }}
-                  className="text-blue-600 font-medium hover:underline"
-                >
+              <div style={{ display: "flex", gap: 10 }}>
+                <button onClick={() => { onUpdate(author.id, { notes: noteDraft }); setEditingNotes(false); }}
+                  style={{ fontSize: 11, fontWeight: 600, color: "var(--accent-coral)", background: "none", border: "none", cursor: "pointer", padding: 0 }}>
                   Save
                 </button>
-                <button
-                  onClick={() => {
-                    setNoteDraft(author.notes);
-                    setEditingNotes(false);
-                  }}
-                  className="text-slate-400 hover:underline"
-                >
+                <button onClick={() => { setNoteDraft(author.notes); setEditingNotes(false); }}
+                  style={{ fontSize: 11, color: "var(--text-muted)", background: "none", border: "none", cursor: "pointer", padding: 0 }}>
                   Cancel
                 </button>
               </div>
             </div>
           ) : (
             <p
-              className="cursor-pointer hover:text-slate-800 transition-colors"
               onClick={() => setEditingNotes(true)}
               title="Click to edit notes"
+              style={{ margin: 0, cursor: "pointer", lineHeight: 1.5, fontStyle: author.notes ? "normal" : "italic", color: author.notes ? "var(--text-body)" : "var(--text-muted)" }}
             >
-              {author.notes || (
-                <span className="italic text-slate-400">Click to add notes...</span>
-              )}
+              {author.notes || "Click to add notes..."}
             </p>
           )}
         </div>
 
         {/* Actions toggle */}
-        <div className="flex items-center justify-between pt-1">
-          <button
-            onClick={() => setExpanded(!expanded)}
-            className="text-xs text-slate-400 hover:text-slate-600 transition-colors"
-          >
-            {expanded ? "Hide actions ▲" : "Actions ▼"}
-          </button>
-        </div>
+        <button
+          onClick={() => setExpanded(!expanded)}
+          style={{
+            fontSize: 11,
+            color: "var(--text-muted)",
+            background: "none",
+            border: "none",
+            cursor: "pointer",
+            textAlign: "left",
+            padding: 0,
+            fontFamily: "var(--font-inter), sans-serif",
+          }}
+        >
+          {expanded ? "Hide actions ▲" : "Actions ▼"}
+        </button>
 
         {expanded && (
-          <div className="border-t border-slate-100 pt-3 flex flex-col gap-2">
-            <label className="text-xs font-medium text-slate-500">Move stage</label>
+          <div style={{ borderTop: "1px solid var(--border)", paddingTop: 12, display: "flex", flexDirection: "column", gap: 8 }}>
+            <label style={{ fontSize: 10, color: "var(--text-muted)", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.08em" }}>Move Stage</label>
             <select
               value={author.stage}
               onChange={(e) => onUpdate(author.id, { stage: e.target.value })}
-              className="text-xs border border-slate-200 rounded-lg px-2 py-1.5 focus:outline-none focus:ring-1 focus:ring-blue-400 bg-white"
+              style={{
+                background: "var(--bg-surface)",
+                border: "1px solid var(--border)",
+                borderRadius: 6,
+                padding: "6px 10px",
+                fontSize: 12,
+                color: "var(--text-primary)",
+                outline: "none",
+                fontFamily: "var(--font-inter), sans-serif",
+              }}
             >
               {stages.map((s) => (
-                <option key={s.id} value={s.id}>
-                  {s.label}
-                </option>
+                <option key={s.id} value={s.id} style={{ background: "var(--bg-secondary)" }}>{s.label}</option>
               ))}
             </select>
 
-            <label className="text-xs font-medium text-slate-500 mt-1">
-              Last contact date
-            </label>
+            <label style={{ fontSize: 10, color: "var(--text-muted)", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.08em" }}>Last Contact</label>
             <input
               type="date"
               value={author.lastContact}
               onChange={(e) => onUpdate(author.id, { lastContact: e.target.value })}
-              className="text-xs border border-slate-200 rounded-lg px-2 py-1.5 focus:outline-none focus:ring-1 focus:ring-blue-400 bg-white"
+              style={{
+                background: "var(--bg-surface)",
+                border: "1px solid var(--border)",
+                borderRadius: 6,
+                padding: "6px 10px",
+                fontSize: 12,
+                color: "var(--text-primary)",
+                outline: "none",
+                fontFamily: "var(--font-inter), sans-serif",
+              }}
             />
 
             <button
-              onClick={() => {
-                if (confirm(`Remove ${author.name}?`)) onDelete(author.id);
+              onClick={() => { if (confirm(`Remove ${author.name}?`)) onDelete(author.id); }}
+              style={{
+                marginTop: 4,
+                fontSize: 11,
+                color: "var(--accent-red)",
+                background: "none",
+                border: "none",
+                cursor: "pointer",
+                textAlign: "left",
+                padding: 0,
+                fontFamily: "var(--font-inter), sans-serif",
               }}
-              className="mt-2 text-xs text-red-400 hover:text-red-600 text-left transition-colors"
             >
               Remove author
             </button>

@@ -1,14 +1,27 @@
 import "./globals.css";
+import { Playfair_Display, Inter } from "next/font/google";
+
+const playfair = Playfair_Display({
+  subsets: ["latin"],
+  variable: "--font-playfair",
+  display: "swap",
+});
+
+const inter = Inter({
+  subsets: ["latin"],
+  variable: "--font-inter",
+  display: "swap",
+});
 
 export const metadata = {
-  title: "Author Hub",
-  description: "Track every author through your publishing process",
+  title: "CORE — Madecraft",
+  description: "Content Operations & Relationship Engine",
 };
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en">
-      <body className="min-h-screen bg-slate-50 text-slate-900 antialiased">
+    <html lang="en" className={`${playfair.variable} ${inter.variable}`}>
+      <body className="min-h-screen antialiased" style={{ background: "var(--bg-primary)", color: "var(--text-primary)" }}>
         {children}
       </body>
     </html>

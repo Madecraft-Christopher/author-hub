@@ -6,7 +6,7 @@ const phases = [
   {
     id: "recruiting",
     label: "1. Recruiting & Prospecting",
-    color: "#3b5bdb",
+    color: "#3F80AE",
     icon: "🔍",
     steps: [
       { text: "Source author on LinkedIn, TikTok, YouTube, or referral", who: "Recruiter / Producer", type: "manual" },
@@ -24,7 +24,7 @@ const phases = [
   {
     id: "nda",
     label: "2. NDA & Publishing Agreement",
-    color: "#0077b6",
+    color: "#2AADD9",
     icon: "📝",
     steps: [
       { text: "Producer moves card to \"Approved / NDA & PA Sent\"", who: "Producer", type: "manual" },
@@ -40,7 +40,7 @@ const phases = [
   {
     id: "alignment",
     label: "3. Content Alignment",
-    color: "#2f9e44",
+    color: "#89BD83",
     icon: "🎯",
     steps: [
       { text: "Producer aligns with author on 1–2 course topics (Taxonomy guidelines)", who: "Producer + Author", type: "manual" },
@@ -55,7 +55,7 @@ const phases = [
   {
     id: "contracting",
     label: "4. Contracting",
-    color: "#4263eb",
+    color: "#09A685",
     icon: "📄",
     steps: [
       { text: "Producer reserves Course ID(s) in Monday → Courses → AGC Course Contracts", who: "Producer", type: "manual" },
@@ -73,7 +73,7 @@ const phases = [
   {
     id: "preproduction",
     label: "5. Pre-Production",
-    color: "#7048e8",
+    color: "#EDD062",
     icon: "🎬",
     steps: [
       { text: "Producer moves card to \"In Production\" and clicks \"Begin Production\"", who: "Producer", type: "manual" },
@@ -91,7 +91,7 @@ const phases = [
   {
     id: "recording",
     label: "6. Recording & Footage Handoff",
-    color: "#c92a2a",
+    color: "#DE7424",
     icon: "📹",
     steps: [
       { text: "Author records all course videos at home (vertical, 4K/1080p, 60s+ per lesson)", who: "Author", type: "manual" },
@@ -110,7 +110,7 @@ const phases = [
   {
     id: "editing",
     label: "7. Editing (Post-Production)",
-    color: "#d9480f",
+    color: "#A9260F",
     icon: "✂️",
     steps: [
       { text: "Mgr. of Post-Production or Senior Editor assigns an editor", who: "Post-Production Mgr", type: "manual" },
@@ -127,7 +127,7 @@ const phases = [
   {
     id: "qa",
     label: "8. QA + Transcripts",
-    color: "#1864ab",
+    color: "#CDAABA",
     icon: "🔎",
     steps: [
       { text: "Director of Content Production reviews videos in Frame.io (color, audio, graphics, bugs)", who: "Director of Content Prod.", type: "manual" },
@@ -140,7 +140,7 @@ const phases = [
   {
     id: "revisions",
     label: "9. Revisions & Final Export",
-    color: "#e67700",
+    color: "#634057",
     icon: "🔧",
     steps: [
       { text: "Editor addresses all Frame.io feedback and corrects bugs", who: "Editor", type: "manual" },
@@ -155,7 +155,7 @@ const phases = [
   {
     id: "regression",
     label: "10. Regression Testing & DTOC",
-    color: "#5f3dc4",
+    color: "#3D3D7C",
     icon: "✅",
     steps: [
       { text: "Producer performs regression testing: compares V2 edits against V1 QA comments in Frame.io", who: "Producer", type: "manual" },
@@ -173,7 +173,7 @@ const phases = [
   {
     id: "delivery",
     label: "11. Delivery & Payment",
-    color: "#087f5b",
+    color: "#09A685",
     icon: "🚀",
     steps: [
       { text: "Delivery request auto-sent when Production Status marked \"Done (AGC)\"", who: "Monday.com", type: "automated" },
@@ -188,9 +188,9 @@ const phases = [
 ];
 
 const typeConfig = {
-  manual:         { label: "Manual",     bg: "#fff0f3", border: "#ffc9d3", text: "#c92a2a" },
-  automated:      { label: "Automated",  bg: "#ebfbee", border: "#8ce99a", text: "#2f9e44" },
-  "semi-automated": { label: "Semi-Auto", bg: "#fff3bf", border: "#ffe066", text: "#e67700" },
+  manual:           { label: "Manual",    bg: "rgba(169,38,15,0.15)",  border: "rgba(169,38,15,0.4)",  text: "#E8816D" },
+  automated:        { label: "Automated", bg: "rgba(9,166,133,0.15)",  border: "rgba(9,166,133,0.4)",  text: "#09A685" },
+  "semi-automated": { label: "Semi-Auto", bg: "rgba(237,208,98,0.15)", border: "rgba(237,208,98,0.4)", text: "#EDD062" },
 };
 
 function getRoleCategory(who) {
@@ -221,42 +221,44 @@ export default function AGCLifecycle() {
                                     p.steps.filter(s => getRoleCategory(s.who) === "madecraft"),
   })).filter(p => p.steps.length > 0);
 
+  const statItems = [
+    { label: "Total Steps", value: totalSteps,   color: "var(--text-primary)" },
+    { label: "Manual",      value: manualSteps,  color: "#E8816D", pct: Math.round(manualSteps / totalSteps * 100) },
+    { label: "Automated",   value: autoSteps,    color: "#09A685", pct: Math.round(autoSteps   / totalSteps * 100) },
+    { label: "Semi-Auto",   value: semiSteps,    color: "#EDD062", pct: Math.round(semiSteps   / totalSteps * 100) },
+  ];
+
   return (
-    <div className="bg-slate-50 min-h-full">
+    <div style={{ background: "var(--bg-primary)", minHeight: "100%" }}>
 
       {/* Stats row */}
-      <div className="bg-white border-b border-slate-200 px-6 py-4">
-        <div className="max-w-5xl mx-auto flex flex-wrap gap-6 items-center">
-          {[
-            { label: "Total Steps", value: totalSteps, color: "#1e293b" },
-            { label: "Manual",      value: manualSteps, color: "#c92a2a", pct: Math.round(manualSteps / totalSteps * 100) },
-            { label: "Automated",   value: autoSteps,   color: "#2f9e44", pct: Math.round(autoSteps   / totalSteps * 100) },
-            { label: "Semi-Auto",   value: semiSteps,   color: "#e67700", pct: Math.round(semiSteps   / totalSteps * 100) },
-          ].map((s, i) => (
-            <div key={i} className="flex items-baseline gap-2">
-              <span className="text-3xl font-bold" style={{ color: s.color }}>{s.value}</span>
-              <span className="text-xs text-slate-400 font-medium">
+      <div style={{ background: "var(--bg-secondary)", borderBottom: "1px solid var(--border)", padding: "20px 40px" }}>
+        <div style={{ maxWidth: 1000, margin: "0 auto", display: "flex", flexWrap: "wrap", gap: 28, alignItems: "center" }}>
+          {statItems.map((s, i) => (
+            <div key={i} style={{ display: "flex", alignItems: "baseline", gap: 8 }}>
+              <span style={{ fontFamily: "monospace", fontSize: 30, fontWeight: 700, color: s.color, lineHeight: 1 }}>{s.value}</span>
+              <span style={{ fontSize: 11, color: "var(--text-muted)", fontWeight: 500 }}>
                 {s.label}{s.pct !== undefined ? ` (${s.pct}%)` : ""}
               </span>
             </div>
           ))}
-          <div className="ml-auto flex gap-6">
-            <div className="flex items-baseline gap-2">
-              <span className="text-2xl font-bold text-blue-600">{authorSteps}</span>
-              <span className="text-xs text-slate-400 font-medium">Author Steps</span>
+          <div style={{ marginLeft: "auto", display: "flex", gap: 20 }}>
+            <div style={{ display: "flex", alignItems: "baseline", gap: 8 }}>
+              <span style={{ fontFamily: "monospace", fontSize: 24, fontWeight: 700, color: "var(--accent-cyan)" }}>{authorSteps}</span>
+              <span style={{ fontSize: 11, color: "var(--text-muted)" }}>Author Steps</span>
             </div>
-            <div className="flex items-baseline gap-2">
-              <span className="text-2xl font-bold text-violet-600">{mcSteps}</span>
-              <span className="text-xs text-slate-400 font-medium">Madecraft Steps</span>
+            <div style={{ display: "flex", alignItems: "baseline", gap: 8 }}>
+              <span style={{ fontFamily: "monospace", fontSize: 24, fontWeight: 700, color: "var(--accent-mauve)" }}>{mcSteps}</span>
+              <span style={{ fontSize: 11, color: "var(--text-muted)" }}>Madecraft Steps</span>
             </div>
           </div>
         </div>
       </div>
 
       {/* Filter chips */}
-      <div className="bg-white border-b border-slate-200 px-6 py-3">
-        <div className="max-w-5xl mx-auto flex flex-wrap gap-2 items-center">
-          <span className="text-xs text-slate-400 font-medium mr-2">Filter:</span>
+      <div style={{ background: "var(--bg-secondary)", borderBottom: "1px solid var(--border)", padding: "12px 40px" }}>
+        <div style={{ maxWidth: 1000, margin: "0 auto", display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center" }}>
+          <span style={{ fontSize: 11, color: "var(--text-muted)", fontWeight: 600, marginRight: 4 }}>Filter:</span>
           {[
             { key: "all",       label: "All Steps" },
             { key: "manual",    label: "Manual Only" },
@@ -264,23 +266,24 @@ export default function AGCLifecycle() {
             { key: "author",    label: "Author Steps" },
             { key: "madecraft", label: "Madecraft Staff" },
           ].map(f => (
-            <button
-              key={f.key}
-              onClick={() => setFilter(f.key)}
-              className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-all ${
-                filter === f.key
-                  ? "bg-blue-600 text-white border-blue-600"
-                  : "bg-slate-50 text-slate-500 border-slate-200 hover:bg-slate-100"
-              }`}
-            >
-              {f.label}
-            </button>
+            <button key={f.key} onClick={() => setFilter(f.key)} style={{
+              padding: "6px 14px",
+              borderRadius: 20,
+              border: "1px solid",
+              borderColor: filter === f.key ? "var(--accent-coral)" : "var(--border)",
+              background: filter === f.key ? "var(--accent-coral)" : "transparent",
+              color: filter === f.key ? "#fff" : "var(--text-muted)",
+              fontSize: 11,
+              fontWeight: 600,
+              cursor: "pointer",
+              fontFamily: "var(--font-inter), sans-serif",
+            }}>{f.label}</button>
           ))}
         </div>
       </div>
 
       {/* Phase list */}
-      <div className="max-w-5xl mx-auto px-6 py-8 flex flex-col gap-1">
+      <div style={{ maxWidth: 1000, margin: "0 auto", padding: "32px 40px 64px", display: "flex", flexDirection: "column", gap: 2 }}>
         {visible.map((phase, pi) => {
           const isOpen = expandedPhase === phase.id;
           const autoPct = Math.round(phase.steps.filter(s => s.type !== "manual").length / phase.steps.length * 100);
@@ -288,99 +291,93 @@ export default function AGCLifecycle() {
           return (
             <div key={phase.id}>
               {pi > 0 && (
-                <div className="flex pl-7 h-4">
-                  <div className="w-0.5 h-full bg-slate-200 rounded" />
+                <div style={{ paddingLeft: 28, height: 16, display: "flex" }}>
+                  <div style={{ width: 2, height: "100%", background: "var(--border)", borderRadius: 1 }} />
                 </div>
               )}
 
-              {/* Phase header button */}
               <button
                 onClick={() => toggle(phase.id)}
-                className={`w-full flex items-center gap-4 px-5 py-4 text-left border transition-all ${
-                  isOpen
-                    ? "bg-white border-slate-300 rounded-t-xl shadow-sm"
-                    : "bg-white border-slate-200 rounded-xl hover:border-slate-300 hover:shadow-sm"
-                }`}
+                style={{
+                  width: "100%", display: "flex", alignItems: "center", gap: 14,
+                  padding: "16px 20px", textAlign: "left",
+                  background: isOpen ? "var(--bg-surface)" : "var(--bg-card)",
+                  border: `1px solid ${isOpen ? phase.color + "55" : "var(--border)"}`,
+                  borderRadius: isOpen ? "10px 10px 0 0" : 10,
+                  cursor: "pointer", fontFamily: "var(--font-inter), sans-serif",
+                  color: "var(--text-primary)",
+                  transition: "border-color 0.15s",
+                }}
               >
-                {/* Icon */}
-                <div
-                  className="w-11 h-11 rounded-lg flex items-center justify-center text-xl shrink-0 border"
-                  style={{ background: `${phase.color}14`, borderColor: `${phase.color}30` }}
-                >
-                  {phase.icon}
-                </div>
+                <div style={{
+                  width: 44, height: 44, borderRadius: 10, flexShrink: 0,
+                  background: `${phase.color}18`,
+                  border: `1px solid ${phase.color}33`,
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  fontSize: 20,
+                }}>{phase.icon}</div>
 
-                {/* Label + sub-info */}
-                <div className="flex-1 min-w-0">
-                  <div className="font-semibold text-slate-900 text-sm leading-snug">{phase.label}</div>
-                  <div className="text-xs text-slate-400 mt-0.5">
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontWeight: 700, fontSize: 14, color: "var(--text-primary)", letterSpacing: "-0.1px" }}>{phase.label}</div>
+                  <div style={{ fontSize: 11, color: "var(--text-muted)", marginTop: 3 }}>
                     {phase.steps.length} steps &middot; {phase.steps.filter(s => s.type === "manual").length} manual &middot; {phase.steps.filter(s => s.type !== "manual").length} auto/semi
                   </div>
                 </div>
 
-                {/* Auto % bar */}
-                <div className="flex items-center gap-2 shrink-0">
-                  <div className="w-24 h-1.5 rounded-full bg-slate-100 overflow-hidden">
-                    <div className="h-full rounded-full bg-green-500" style={{ width: `${autoPct}%` }} />
+                <div style={{ display: "flex", alignItems: "center", gap: 8, flexShrink: 0 }}>
+                  <div style={{ width: 96, height: 4, borderRadius: 2, background: "var(--border)", overflow: "hidden" }}>
+                    <div style={{ width: `${autoPct}%`, height: "100%", background: "var(--accent-teal)", borderRadius: 2 }} />
                   </div>
-                  <span className="text-xs text-slate-400 w-8 text-right">{autoPct}%</span>
+                  <span style={{ fontFamily: "monospace", fontSize: 11, color: "var(--text-muted)", width: 32, textAlign: "right" }}>{autoPct}%</span>
                 </div>
 
-                <span className={`text-slate-400 text-base shrink-0 transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`}>▾</span>
+                <span style={{ color: "var(--text-muted)", fontSize: 16, flexShrink: 0, transform: isOpen ? "rotate(180deg)" : "none", transition: "transform 0.2s" }}>▾</span>
               </button>
 
-              {/* Steps */}
               {isOpen && (
-                <div className="bg-white border border-t-0 border-slate-300 rounded-b-xl overflow-hidden">
+                <div style={{
+                  background: "var(--bg-card)",
+                  border: `1px solid ${phase.color}55`,
+                  borderTop: "none",
+                  borderRadius: "0 0 10px 10px",
+                }}>
                   {phase.steps.map((step, si) => {
                     const cfg = typeConfig[step.type];
                     const role = getRoleCategory(step.who);
                     return (
-                      <div
-                        key={si}
-                        className="flex gap-4 px-5 py-3 border-b border-slate-50 last:border-0 hover:bg-slate-50 transition-colors"
-                      >
-                        {/* Dot + line */}
-                        <div className="flex flex-col items-center pt-1 shrink-0 w-4">
-                          <div
-                            className="shrink-0"
-                            style={{
-                              width: step.decision ? 12 : 9,
-                              height: step.decision ? 12 : 9,
-                              borderRadius: step.decision ? 2 : "50%",
-                              background: phase.color,
-                              transform: step.decision ? "rotate(45deg)" : "none",
-                              boxShadow: `0 0 0 3px ${phase.color}20`,
-                            }}
-                          />
+                      <div key={si} style={{
+                        display: "flex", gap: 14, padding: "12px 20px",
+                        borderBottom: si < phase.steps.length - 1 ? "1px solid var(--border)" : "none",
+                      }}>
+                        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", paddingTop: 4, flexShrink: 0, width: 16 }}>
+                          <div style={{
+                            width: step.decision ? 12 : 9,
+                            height: step.decision ? 12 : 9,
+                            borderRadius: step.decision ? 2 : "50%",
+                            background: phase.color,
+                            transform: step.decision ? "rotate(45deg)" : "none",
+                            boxShadow: `0 0 0 3px ${phase.color}22`,
+                            flexShrink: 0,
+                          }} />
                           {si < phase.steps.length - 1 && (
-                            <div className="w-px flex-1 mt-1 bg-slate-200" />
+                            <div style={{ width: 1.5, flex: 1, marginTop: 4, background: "var(--border)", borderRadius: 1 }} />
                           )}
                         </div>
 
-                        {/* Content */}
-                        <div className="flex-1 min-w-0 pb-1">
-                          <p className="text-sm text-slate-700 leading-relaxed">{step.text}</p>
-                          <div className="flex flex-wrap gap-1.5 mt-2">
-                            {/* Type badge */}
-                            <span
-                              className="text-xs font-semibold px-2 py-0.5 rounded border"
-                              style={{ background: cfg.bg, borderColor: cfg.border, color: cfg.text }}
-                            >
-                              {cfg.label}
-                            </span>
-                            {/* Who badge */}
-                            <span
-                              className={`text-xs font-medium px-2 py-0.5 rounded border ${
-                                role === "author"
-                                  ? "bg-blue-50 text-blue-700 border-blue-100"
-                                  : role === "system"
-                                  ? "bg-green-50 text-green-700 border-green-100"
-                                  : "bg-violet-50 text-violet-700 border-violet-100"
-                              }`}
-                            >
-                              {step.who}
-                            </span>
+                        <div style={{ flex: 1, minWidth: 0, paddingBottom: 2 }}>
+                          <p style={{ fontSize: 13, color: "var(--text-body)", lineHeight: 1.55, margin: 0 }}>{step.text}</p>
+                          <div style={{ display: "flex", gap: 6, marginTop: 7, flexWrap: "wrap" }}>
+                            <span style={{
+                              fontSize: 10, fontWeight: 700, letterSpacing: "0.06em",
+                              textTransform: "uppercase", padding: "2px 8px", borderRadius: 4,
+                              background: cfg.bg, border: `1px solid ${cfg.border}`, color: cfg.text,
+                            }}>{cfg.label}</span>
+                            <span style={{
+                              fontSize: 10, fontWeight: 500, padding: "2px 8px", borderRadius: 4,
+                              background: role === "author" ? "rgba(42,173,217,0.12)" : role === "system" ? "rgba(9,166,133,0.12)" : "rgba(99,64,87,0.2)",
+                              color: role === "author" ? "var(--accent-cyan)" : role === "system" ? "var(--accent-teal)" : "var(--accent-mauve)",
+                              border: `1px solid ${role === "author" ? "rgba(42,173,217,0.25)" : role === "system" ? "rgba(9,166,133,0.25)" : "rgba(205,170,186,0.25)"}`,
+                            }}>{step.who}</span>
                           </div>
                         </div>
                       </div>
@@ -393,40 +390,47 @@ export default function AGCLifecycle() {
         })}
 
         {/* Legend */}
-        <div className="mt-10 bg-white border border-slate-200 rounded-xl p-6">
-          <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">Legend</p>
-          <div className="flex flex-wrap gap-10">
-            <div className="flex flex-col gap-2">
-              <p className="text-xs text-slate-400 font-medium mb-1">Step Type</p>
+        <div style={{ marginTop: 48, padding: 24, borderRadius: 10, border: "1px solid var(--border)", background: "var(--bg-card)" }}>
+          <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.15em", textTransform: "uppercase", color: "var(--text-muted)", marginBottom: 16 }}>Legend</p>
+          <div style={{ display: "flex", gap: 36, flexWrap: "wrap" }}>
+            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+              <p style={{ fontSize: 10, color: "var(--text-muted)", fontWeight: 600, marginBottom: 4 }}>Step Type</p>
               {Object.entries(typeConfig).map(([, cfg]) => (
-                <div key={cfg.label} className="flex items-center gap-2">
-                  <div className="w-2.5 h-2.5 rounded-full" style={{ background: cfg.text }} />
-                  <span className="text-xs text-slate-600">{cfg.label}</span>
+                <div key={cfg.label} style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                  <div style={{ width: 9, height: 9, borderRadius: "50%", background: cfg.text }} />
+                  <span style={{ fontSize: 12, color: "var(--text-body)" }}>{cfg.label}</span>
                 </div>
               ))}
             </div>
-            <div className="flex flex-col gap-2">
-              <p className="text-xs text-slate-400 font-medium mb-1">Responsible Party</p>
-              <div className="flex items-center gap-2"><div className="w-2.5 h-2.5 rounded bg-violet-400" /><span className="text-xs text-slate-600">Madecraft Staff</span></div>
-              <div className="flex items-center gap-2"><div className="w-2.5 h-2.5 rounded bg-blue-400" /><span className="text-xs text-slate-600">Author (External)</span></div>
-              <div className="flex items-center gap-2"><div className="w-2.5 h-2.5 rounded bg-green-500" /><span className="text-xs text-slate-600">System / Automation</span></div>
+            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+              <p style={{ fontSize: 10, color: "var(--text-muted)", fontWeight: 600, marginBottom: 4 }}>Responsible Party</p>
+              {[
+                { color: "var(--accent-mauve)", label: "Madecraft Staff" },
+                { color: "var(--accent-cyan)",  label: "Author (External)" },
+                { color: "var(--accent-teal)",  label: "System / Automation" },
+              ].map(({ color, label }) => (
+                <div key={label} style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                  <div style={{ width: 9, height: 9, borderRadius: 2, background: color }} />
+                  <span style={{ fontSize: 12, color: "var(--text-body)" }}>{label}</span>
+                </div>
+              ))}
             </div>
-            <div className="flex flex-col gap-2">
-              <p className="text-xs text-slate-400 font-medium mb-1">Progress Bar</p>
-              <div className="flex items-center gap-2">
-                <div className="w-10 h-2 rounded-full bg-green-500" />
-                <span className="text-xs text-slate-600">% of phase that is automated</span>
+            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+              <p style={{ fontSize: 10, color: "var(--text-muted)", fontWeight: 600, marginBottom: 4 }}>Symbols</p>
+              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                <div style={{ width: 9, height: 9, borderRadius: "50%", background: "var(--text-muted)" }} />
+                <span style={{ fontSize: 12, color: "var(--text-body)" }}>Standard step</span>
               </div>
-              <div className="flex items-center gap-2">
-                <div className="w-3 h-3 rounded rotate-45 bg-slate-400" />
-                <span className="text-xs text-slate-600">Decision point</span>
+              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                <div style={{ width: 9, height: 9, borderRadius: 2, transform: "rotate(45deg)", background: "var(--text-muted)" }} />
+                <span style={{ fontSize: 12, color: "var(--text-body)" }}>Decision point</span>
               </div>
             </div>
           </div>
         </div>
 
-        <p className="text-xs text-slate-300 mt-4 leading-relaxed">
-          Sources: Tiger Team AGC Content Production Playbook · AGC + Monday.com Workflow (Confluence) · Post Production (Confluence) · Regression Testing & DTOCs (Confluence) · AGC Recruiter Training & Onboarding · Sending AGC Invoice for Payment (Confluence)
+        <p style={{ fontSize: 10, color: "var(--text-muted)", marginTop: 16, lineHeight: 1.7, fontFamily: "monospace" }}>
+          Sources: Tiger Team AGC Content Production Playbook · AGC + Monday.com Workflow (Confluence) · Post Production (Confluence) · Regression Testing & DTOCs (Confluence) · AGC Recruiter Training · Sending AGC Invoice for Payment (Confluence)
         </p>
       </div>
     </div>

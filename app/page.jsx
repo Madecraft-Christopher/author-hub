@@ -5,18 +5,18 @@ import AuthorCard from "../components/AuthorCard";
 import AddAuthorModal from "../components/AddAuthorModal";
 import AGCLifecycle from "../components/AGCLifecycle";
 
-const STAGES = [
-  { id: "recruiting",         label: "Recruiting",                  color: "bg-slate-400" },
-  { id: "nda_pa",             label: "NDA / PA",                    color: "bg-sky-400" },
-  { id: "content_alignment",  label: "Content Alignment",           color: "bg-blue-500" },
-  { id: "contracting",        label: "Contracting",                 color: "bg-indigo-500" },
-  { id: "pre_production",     label: "Pre-Production",              color: "bg-violet-500" },
-  { id: "recording",          label: "Recording & Handoff",         color: "bg-purple-500" },
-  { id: "editing",            label: "Editing",                     color: "bg-fuchsia-500" },
-  { id: "qa_transcripts",     label: "QA + Transcripts",            color: "bg-pink-500" },
-  { id: "revisions",          label: "Revisions",                   color: "bg-rose-500" },
-  { id: "regression_testing", label: "Regression Testing & DTOC",   color: "bg-orange-400" },
-  { id: "delivery_payment",   label: "Delivery & Payment",          color: "bg-green-500" },
+export const STAGES = [
+  { id: "recruiting",         label: "Recruiting",                hex: "#3F80AE" },
+  { id: "nda_pa",             label: "NDA / PA",                  hex: "#2AADD9" },
+  { id: "content_alignment",  label: "Content Alignment",         hex: "#09A685" },
+  { id: "contracting",        label: "Contracting",               hex: "#89BD83" },
+  { id: "pre_production",     label: "Pre-Production",            hex: "#EDD062" },
+  { id: "recording",          label: "Recording & Handoff",       hex: "#DE7424" },
+  { id: "editing",            label: "Editing",                   hex: "#A9260F" },
+  { id: "qa_transcripts",     label: "QA + Transcripts",          hex: "#CDAABA" },
+  { id: "revisions",          label: "Revisions",                 hex: "#634057" },
+  { id: "regression_testing", label: "Regression Testing & DTOC", hex: "#3D3D7C" },
+  { id: "delivery_payment",   label: "Delivery & Payment",        hex: "#EFE9D3" },
 ];
 
 const SAMPLE_AUTHORS = [
@@ -113,47 +113,70 @@ export default function Home() {
     return matchesStage && matchesSearch;
   });
 
-  const stageCount = (stageId) => authors.filter((a) => a.stage === stageId).length;
-
-  const handleAdd = (newAuthor) => {
-    setAuthors((prev) => [...prev, { ...newAuthor, id: Date.now() }]);
-    setShowModal(false);
-  };
-
-  const handleUpdate = (id, updates) => {
-    setAuthors((prev) => prev.map((a) => (a.id === id ? { ...a, ...updates } : a)));
-  };
-
-  const handleDelete = (id) => {
-    setAuthors((prev) => prev.filter((a) => a.id !== id));
-  };
+  const stageCount = (id) => authors.filter((a) => a.stage === id).length;
+  const handleAdd    = (a) => { setAuthors((p) => [...p, { ...a, id: Date.now() }]); setShowModal(false); };
+  const handleUpdate = (id, u) => setAuthors((p) => p.map((a) => (a.id === id ? { ...a, ...u } : a)));
+  const handleDelete = (id)    => setAuthors((p) => p.filter((a) => a.id !== id));
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col">
+    <div className="min-h-screen flex flex-col" style={{ background: "var(--bg-primary)" }}>
 
-      {/* ── Top Header ── */}
-      <header className="bg-white border-b border-slate-200 px-6 py-4 flex items-center justify-between shadow-sm shrink-0">
+      {/* ── Header ── */}
+      <header style={{
+        background: "var(--bg-secondary)",
+        borderBottom: "1px solid var(--border)",
+        padding: "24px 40px",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between",
+        gap: 16,
+      }}>
         <div>
-          <div className="flex items-center gap-2">
-            <span className="text-xs font-semibold tracking-widest text-slate-400 uppercase">Madecraft</span>
-            <span className="w-1 h-1 rounded-full bg-slate-300 inline-block" />
-            <span className="text-xs font-medium tracking-widest text-blue-600 uppercase">Author Hub</span>
-          </div>
-          <h1 className="text-xl font-bold text-slate-900 tracking-tight mt-0.5">
-            AGC Remote Author Lifecycle
+          <p style={{
+            fontSize: 10,
+            fontFamily: "var(--font-inter), sans-serif",
+            letterSpacing: "0.18em",
+            textTransform: "uppercase",
+            color: "var(--text-muted)",
+            marginBottom: 6,
+          }}>
+            Madecraft &nbsp;·&nbsp; Content Operations & Relationship Engine
+          </p>
+          <h1 style={{
+            fontFamily: "var(--font-playfair), Georgia, serif",
+            fontSize: 42,
+            fontWeight: 700,
+            letterSpacing: "-0.5px",
+            lineHeight: 1,
+            color: "var(--text-primary)",
+            margin: 0,
+          }}>
+            CORE
+            <span style={{ color: "var(--accent-gold)", fontStyle: "italic", marginLeft: 12, fontSize: 36 }}>
+              AGC Author Lifecycle
+            </span>
           </h1>
-          <p className="text-xs text-slate-400 mt-0.5">
-            End-to-end author management — from recruiting through final delivery
+          <p style={{ fontSize: 13, color: "var(--text-muted)", marginTop: 8, fontWeight: 400 }}>
+            End-to-end author management — recruiting through final delivery
           </p>
         </div>
 
         {activeTab === "authors" && (
           <button
             onClick={() => setShowModal(true)}
-            className="text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors shrink-0"
-            style={{ backgroundColor: "#3b5bdb" }}
-            onMouseEnter={(e) => (e.target.style.backgroundColor = "#2f4ac0")}
-            onMouseLeave={(e) => (e.target.style.backgroundColor = "#3b5bdb")}
+            style={{
+              background: "var(--accent-coral)",
+              color: "#fff",
+              border: "none",
+              borderRadius: "var(--radius-btn)",
+              padding: "10px 24px",
+              fontSize: 13,
+              fontWeight: 600,
+              cursor: "pointer",
+              whiteSpace: "nowrap",
+              letterSpacing: "0.02em",
+              fontFamily: "var(--font-inter), sans-serif",
+            }}
           >
             + Add Author
           </button>
@@ -161,67 +184,116 @@ export default function Home() {
       </header>
 
       {/* ── Tab Bar ── */}
-      <div className="bg-white border-b border-slate-200 px-6 shrink-0">
-        <div className="flex gap-1">
-          {TABS.map((tab) => (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
-              className={`px-5 py-3 text-sm font-medium border-b-2 transition-all ${
-                activeTab === tab.id
-                  ? "border-blue-600 text-blue-600"
-                  : "border-transparent text-slate-500 hover:text-slate-700"
-              }`}
-            >
-              {tab.label}
-            </button>
-          ))}
-        </div>
+      <div style={{
+        background: "var(--bg-secondary)",
+        borderBottom: "1px solid var(--border)",
+        padding: "0 40px",
+        display: "flex",
+        gap: 0,
+      }}>
+        {TABS.map((tab) => (
+          <button
+            key={tab.id}
+            onClick={() => setActiveTab(tab.id)}
+            style={{
+              padding: "14px 24px",
+              fontSize: 13,
+              fontWeight: 500,
+              background: "none",
+              border: "none",
+              borderBottom: activeTab === tab.id
+                ? "2px solid var(--accent-coral)"
+                : "2px solid transparent",
+              color: activeTab === tab.id
+                ? "var(--accent-coral)"
+                : "var(--text-muted)",
+              cursor: "pointer",
+              fontFamily: "var(--font-inter), sans-serif",
+              transition: "color 0.15s",
+              letterSpacing: "0.03em",
+            }}
+          >
+            {tab.label}
+          </button>
+        ))}
       </div>
 
-      {/* ── Tab Content ── */}
+      {/* ── Content ── */}
       <div className="flex-1 overflow-auto">
 
-        {/* Process Map Tab */}
         {activeTab === "process" && <AGCLifecycle />}
 
-        {/* Authors Tab */}
         {activeTab === "authors" && (
-          <div className="flex flex-col">
-
-            {/* Pipeline filter bar */}
-            <div className="bg-white border-b border-slate-200 px-6 py-3 shrink-0">
-              <div className="flex items-center gap-1 overflow-x-auto">
+          <div>
+            {/* Pipeline filter strip */}
+            <div style={{
+              background: "var(--bg-secondary)",
+              borderBottom: "1px solid var(--border)",
+              padding: "12px 40px",
+              overflowX: "auto",
+            }}>
+              <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
+                {/* All button */}
                 <button
                   onClick={() => setFilterStage("all")}
-                  className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-all ${
-                    filterStage === "all"
-                      ? "bg-slate-900 text-white"
-                      : "bg-slate-100 text-slate-600 hover:bg-slate-200"
-                  }`}
+                  style={{
+                    display: "flex", alignItems: "center", gap: 6,
+                    padding: "6px 14px",
+                    borderRadius: 20,
+                    border: "1px solid",
+                    borderColor: filterStage === "all" ? "var(--accent-coral)" : "var(--border)",
+                    background: filterStage === "all" ? "var(--accent-coral)" : "transparent",
+                    color: filterStage === "all" ? "#fff" : "var(--text-muted)",
+                    fontSize: 11,
+                    fontWeight: 600,
+                    cursor: "pointer",
+                    whiteSpace: "nowrap",
+                    fontFamily: "var(--font-inter), sans-serif",
+                  }}
                 >
                   All
-                  <span className="px-1.5 py-0.5 rounded-full text-xs bg-slate-700 text-white">
-                    {authors.length}
-                  </span>
+                  <span style={{
+                    background: filterStage === "all" ? "rgba(255,255,255,0.2)" : "var(--border)",
+                    color: filterStage === "all" ? "#fff" : "var(--text-muted)",
+                    borderRadius: 10,
+                    padding: "1px 6px",
+                    fontSize: 10,
+                  }}>{authors.length}</span>
                 </button>
 
                 {STAGES.map((stage, i) => (
-                  <div key={stage.id} className="flex items-center">
-                    {i > 0 && <span className="text-slate-300 mx-1 text-lg select-none">›</span>}
+                  <div key={stage.id} style={{ display: "flex", alignItems: "center" }}>
+                    {i > 0 && <span style={{ color: "var(--border-hover)", margin: "0 2px", fontSize: 14 }}>›</span>}
                     <button
                       onClick={() => setFilterStage(stage.id)}
-                      className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-all ${
-                        filterStage === stage.id
-                          ? "bg-slate-900 text-white"
-                          : "bg-slate-100 text-slate-600 hover:bg-slate-200"
-                      }`}
+                      style={{
+                        display: "flex", alignItems: "center", gap: 6,
+                        padding: "6px 14px",
+                        borderRadius: 20,
+                        border: "1px solid",
+                        borderColor: filterStage === stage.id ? stage.hex : "var(--border)",
+                        background: filterStage === stage.id ? `${stage.hex}22` : "transparent",
+                        color: filterStage === stage.id ? stage.hex : "var(--text-muted)",
+                        fontSize: 11,
+                        fontWeight: 600,
+                        cursor: "pointer",
+                        whiteSpace: "nowrap",
+                        fontFamily: "var(--font-inter), sans-serif",
+                      }}
                     >
-                      <span className={`w-2 h-2 rounded-full ${stage.color}`} />
+                      <span style={{
+                        width: 7, height: 7, borderRadius: "50%",
+                        background: stage.hex,
+                        flexShrink: 0,
+                      }} />
                       {stage.label}
-                      <span className="px-1.5 py-0.5 rounded-full text-xs bg-slate-200 text-slate-600">
-                        {stageCount(stage.id)}
-                      </span>
+                      <span style={{
+                        background: "var(--border)",
+                        color: "var(--text-muted)",
+                        borderRadius: 10,
+                        padding: "1px 6px",
+                        fontSize: 10,
+                      }}>{stageCount(stage.id)}</span>
                     </button>
                   </div>
                 ))}
@@ -229,28 +301,45 @@ export default function Home() {
             </div>
 
             {/* Search */}
-            <div className="px-6 pt-5 pb-3">
+            <div style={{ padding: "24px 40px 12px" }}>
               <input
                 type="text"
                 placeholder="Search by name, course, or author ID..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="w-full max-w-md border border-slate-200 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+                style={{
+                  background: "var(--bg-surface)",
+                  border: "1px solid var(--border)",
+                  borderRadius: 8,
+                  padding: "10px 16px",
+                  fontSize: 13,
+                  color: "var(--text-primary)",
+                  width: "100%",
+                  maxWidth: 420,
+                  outline: "none",
+                  fontFamily: "var(--font-inter), sans-serif",
+                }}
+                onFocus={(e) => (e.target.style.borderColor = "var(--accent-coral)")}
+                onBlur={(e) => (e.target.style.borderColor = "var(--border)")}
               />
-              <p className="text-xs text-slate-400 mt-2">
+              <p style={{ fontSize: 11, color: "var(--text-muted)", marginTop: 8 }}>
                 Showing {filtered.length} of {authors.length} authors
               </p>
             </div>
 
-            {/* Author Cards */}
-            <main className="px-6 pb-10">
+            {/* Author cards */}
+            <main style={{ padding: "0 40px 60px" }}>
               {filtered.length === 0 ? (
-                <div className="text-center py-20 text-slate-400">
-                  <p className="text-lg">No authors found.</p>
-                  <p className="text-sm mt-1">Try a different filter or add a new author.</p>
+                <div style={{ textAlign: "center", padding: "80px 0", color: "var(--text-muted)" }}>
+                  <p style={{ fontSize: 18 }}>No authors found.</p>
+                  <p style={{ fontSize: 13, marginTop: 6 }}>Try a different filter or add a new author.</p>
                 </div>
               ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                <div style={{
+                  display: "grid",
+                  gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))",
+                  gap: 16,
+                }}>
                   {filtered.map((author) => (
                     <AuthorCard
                       key={author.id}
