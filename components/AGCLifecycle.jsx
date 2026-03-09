@@ -230,7 +230,6 @@ function getRoleCategory(who) {
 
 export default function AGCLifecycle({ authors = [], stages = [] }) {
   const [expandedPhase, setExpandedPhase] = useState(null);
-  const [filter, setFilter] = useState("all");
 
   const authorCountForPhase = (phaseId) =>
     authors.filter((a) => a.stage === phaseId).length;
@@ -243,15 +242,6 @@ export default function AGCLifecycle({ authors = [], stages = [] }) {
   const mcSteps       = phases.reduce((s, p) => s + p.steps.filter(x => getRoleCategory(x.who) === "madecraft").length, 0);
 
   const toggle = (id) => setExpandedPhase(expandedPhase === id ? null : id);
-
-  const visible = phases.map(p => ({
-    ...p,
-    steps: filter === "all"       ? p.steps :
-           filter === "manual"    ? p.steps.filter(s => s.type === "manual") :
-           filter === "automated" ? p.steps.filter(s => s.type !== "manual") :
-           filter === "author"    ? p.steps.filter(s => getRoleCategory(s.who) === "author") :
-                                    p.steps.filter(s => getRoleCategory(s.who) === "madecraft"),
-  })).filter(p => p.steps.length > 0);
 
   const statItems = [
     { label: "Total Steps", value: totalSteps,   color: "var(--text-primary)" },
@@ -287,36 +277,10 @@ export default function AGCLifecycle({ authors = [], stages = [] }) {
         </div>
       </div>
 
-      {/* Filter chips */}
-      <div style={{ background: "var(--bg-secondary)", borderBottom: "1px solid var(--border)", padding: "12px 40px" }}>
-        <div style={{ maxWidth: 1000, margin: "0 auto", display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center" }}>
-          <span style={{ fontSize: 11, color: "var(--text-muted)", fontWeight: 600, marginRight: 4 }}>Filter:</span>
-          {[
-            { key: "all",       label: "All Steps" },
-            { key: "manual",    label: "Manual Only" },
-            { key: "automated", label: "Automated / Semi-Auto" },
-            { key: "author",    label: "Author Steps" },
-            { key: "madecraft", label: "Madecraft Staff" },
-          ].map(f => (
-            <button key={f.key} onClick={() => setFilter(f.key)} style={{
-              padding: "6px 14px",
-              borderRadius: 20,
-              border: "1px solid",
-              borderColor: filter === f.key ? "var(--accent-coral)" : "var(--border)",
-              background: filter === f.key ? "var(--accent-coral)" : "transparent",
-              color: filter === f.key ? "#fff" : "var(--text-muted)",
-              fontSize: 11,
-              fontWeight: 600,
-              cursor: "pointer",
-              fontFamily: "var(--font-inter), sans-serif",
-            }}>{f.label}</button>
-          ))}
-        </div>
-      </div>
 
       {/* Phase list */}
       <div style={{ maxWidth: 1000, margin: "0 auto", padding: "32px 40px 64px", display: "flex", flexDirection: "column", gap: 2 }}>
-        {visible.map((phase, pi) => {
+        {phases.map((phase, pi) => {
           const isOpen = expandedPhase === phase.id;
           const autoPct = Math.round(phase.steps.filter(s => s.type !== "manual").length / phase.steps.length * 100);
           const authorCount = authorCountForPhase(phase.id);
