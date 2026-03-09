@@ -2,6 +2,9 @@
 
 import { useState } from "react";
 
+const FIGMA_URL = "https://www.figma.com/board/Hs1SVciHjwl0COs1VjQwK3/AGC-Author-Journey";
+const FIGMA_EMBED = `https://www.figma.com/embed?embed_host=share&url=${encodeURIComponent(FIGMA_URL)}`;
+
 const phases = [
   {
     id: "recruiting",
@@ -200,6 +203,7 @@ function getRoleCategory(who) {
 }
 
 export default function AGCLifecycle() {
+  const [view, setView] = useState("flowchart");
   const [expandedPhase, setExpandedPhase] = useState(null);
   const [filter, setFilter] = useState("all");
 
@@ -229,7 +233,63 @@ export default function AGCLifecycle() {
   ];
 
   return (
-    <div style={{ background: "var(--bg-primary)", minHeight: "100%" }}>
+    <div style={{ background: "var(--bg-primary)", minHeight: "100%", display: "flex", flexDirection: "column" }}>
+
+      {/* View toggle */}
+      <div style={{
+        background: "var(--bg-secondary)", borderBottom: "1px solid var(--border)",
+        padding: "0 40px", display: "flex", gap: 0, alignItems: "center",
+      }}>
+        {[
+          { id: "flowchart", label: "⬡ Flowchart" },
+          { id: "detail",    label: "☰ Step-by-Step" },
+        ].map((v) => (
+          <button key={v.id} onClick={() => setView(v.id)} style={{
+            padding: "12px 20px", fontSize: 12, fontWeight: 600,
+            background: "none", border: "none", cursor: "pointer",
+            fontFamily: "var(--font-inter), sans-serif",
+            borderBottom: view === v.id ? "2px solid var(--accent-coral)" : "2px solid transparent",
+            color: view === v.id ? "var(--accent-coral)" : "var(--text-muted)",
+            transition: "color 0.15s",
+          }}>{v.label}</button>
+        ))}
+        {view === "flowchart" && (
+          <a
+            href={FIGMA_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{
+              marginLeft: "auto", fontSize: 11, color: "var(--text-muted)",
+              textDecoration: "none", fontWeight: 500, padding: "4px 10px",
+              borderRadius: 6, border: "1px solid var(--border)",
+              display: "flex", alignItems: "center", gap: 5,
+            }}
+          >
+            ↗ Open in Figma
+          </a>
+        )}
+      </div>
+
+      {/* Flowchart view */}
+      {view === "flowchart" && (
+        <div style={{ flex: 1, display: "flex", flexDirection: "column", height: "calc(100vh - 160px)" }}>
+          <iframe
+            src={FIGMA_EMBED}
+            allowFullScreen
+            style={{
+              width: "100%",
+              height: "100%",
+              border: "none",
+              background: "var(--bg-primary)",
+            }}
+            title="AGC Author Journey Flowchart"
+          />
+        </div>
+      )}
+
+      {/* Detail view */}
+      {view === "detail" && (
+      <div style={{ flex: 1 }}>
 
       {/* Stats row */}
       <div style={{ background: "var(--bg-secondary)", borderBottom: "1px solid var(--border)", padding: "20px 40px" }}>
@@ -433,6 +493,9 @@ export default function AGCLifecycle() {
           Sources: Tiger Team AGC Content Production Playbook · AGC + Monday.com Workflow (Confluence) · Post Production (Confluence) · Regression Testing & DTOCs (Confluence) · AGC Recruiter Training · Sending AGC Invoice for Payment (Confluence)
         </p>
       </div>
+
+      </div>
+      )}
     </div>
   );
 }
