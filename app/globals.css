@@ -3,26 +3,34 @@
 @tailwind utilities;
 
 :root {
-  --bg-primary:   #0D0D0D;
-  --bg-secondary: #1D1223;
-  --bg-surface:   #221830;
-  --bg-card:      #1A1628;
-  --text-primary: #EFE9D3;
-  --text-body:    #D0CCC7;
-  --text-muted:   rgba(239,233,211,0.4);
-  --accent-gold:  #EDD062;
-  --accent-coral: #DE7424;
-  --accent-cyan:  #2AADD9;
+  /* Backgrounds — warm cream layered system */
+  --bg-primary:   #F5F2EA;   /* warm cream page base */
+  --bg-secondary: #FDFAF5;   /* near-white for header/nav */
+  --bg-surface:   #EFE9D3;   /* inset surfaces, notes, course boxes */
+  --bg-card:      #FFFFFF;   /* card backgrounds */
+
+  /* Text */
+  --text-primary: #1D1223;   /* deep purple-black — from Madecraft palette */
+  --text-body:    #3A3035;   /* warm dark for body copy */
+  --text-muted:   #7A6A72;   /* readable warm grey for labels/meta */
+
+  /* Borders */
+  --border:       rgba(29,18,35,0.1);
+  --border-hover: rgba(29,18,35,0.2);
+
+  /* Accents — Madecraft palette, adjusted for light bg readability */
+  --accent-gold:  #9A7800;   /* darkened from #EDD062 for text contrast */
+  --accent-coral: #DE7424;   /* primary CTA — orange */
+  --accent-cyan:  #1A8FB8;   /* darkened from #2AADD9 */
   --accent-red:   #A9260F;
   --accent-indigo:#3D3D7C;
-  --accent-blue:  #3F80AE;
+  --accent-blue:  #2E6A96;   /* darkened from #3F80AE */
   --accent-teal:  #09A685;
-  --accent-mauve: #CDAABA;
-  --accent-green: #89BD83;
+  --accent-mauve: #7A4A62;   /* darkened from #CDAABA */
+  --accent-green: #4A7A45;   /* darkened from #89BD83 */
   --accent-plum:  #634057;
   --accent-cream: #EFE9D3;
-  --border:       rgba(239,233,211,0.08);
-  --border-hover: rgba(239,233,211,0.16);
+
   --radius-card:  10px;
   --radius-btn:   28px;
 }
@@ -47,5 +55,5 @@ h1, h2, h3 {
 }
 
 ::-webkit-scrollbar { width: 6px; height: 6px; }
-::-webkit-scrollbar-track { background: var(--bg-secondary); }
+::-webkit-scrollbar-track { background: var(--bg-surface); }
 ::-webkit-scrollbar-thumb { background: var(--border-hover); border-radius: 3px; }

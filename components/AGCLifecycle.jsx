@@ -188,9 +188,9 @@ const phases = [
 ];
 
 const typeConfig = {
-  manual:           { label: "Manual",    bg: "rgba(169,38,15,0.15)",  border: "rgba(169,38,15,0.4)",  text: "#E8816D" },
-  automated:        { label: "Automated", bg: "rgba(9,166,133,0.15)",  border: "rgba(9,166,133,0.4)",  text: "#09A685" },
-  "semi-automated": { label: "Semi-Auto", bg: "rgba(237,208,98,0.15)", border: "rgba(237,208,98,0.4)", text: "#EDD062" },
+  manual:           { label: "Manual",    bg: "rgba(169,38,15,0.08)",  border: "rgba(169,38,15,0.25)",  text: "#A9260F" },
+  automated:        { label: "Automated", bg: "rgba(9,166,133,0.08)",  border: "rgba(9,166,133,0.25)",  text: "#09A685" },
+  "semi-automated": { label: "Semi-Auto", bg: "rgba(154,120,0,0.08)",  border: "rgba(154,120,0,0.25)",  text: "#9A7800" },
 };
 
 function getRoleCategory(who) {
@@ -223,9 +223,9 @@ export default function AGCLifecycle() {
 
   const statItems = [
     { label: "Total Steps", value: totalSteps,   color: "var(--text-primary)" },
-    { label: "Manual",      value: manualSteps,  color: "#E8816D", pct: Math.round(manualSteps / totalSteps * 100) },
+    { label: "Manual",      value: manualSteps,  color: "#A9260F", pct: Math.round(manualSteps / totalSteps * 100) },
     { label: "Automated",   value: autoSteps,    color: "#09A685", pct: Math.round(autoSteps   / totalSteps * 100) },
-    { label: "Semi-Auto",   value: semiSteps,    color: "#EDD062", pct: Math.round(semiSteps   / totalSteps * 100) },
+    { label: "Semi-Auto",   value: semiSteps,    color: "#9A7800", pct: Math.round(semiSteps   / totalSteps * 100) },
   ];
 
   return (
@@ -244,11 +244,11 @@ export default function AGCLifecycle() {
           ))}
           <div style={{ marginLeft: "auto", display: "flex", gap: 20 }}>
             <div style={{ display: "flex", alignItems: "baseline", gap: 8 }}>
-              <span style={{ fontFamily: "monospace", fontSize: 24, fontWeight: 700, color: "var(--accent-cyan)" }}>{authorSteps}</span>
+              <span style={{ fontFamily: "monospace", fontSize: 24, fontWeight: 700, color: "var(--accent-blue)" }}>{authorSteps}</span>
               <span style={{ fontSize: 11, color: "var(--text-muted)" }}>Author Steps</span>
             </div>
             <div style={{ display: "flex", alignItems: "baseline", gap: 8 }}>
-              <span style={{ fontFamily: "monospace", fontSize: 24, fontWeight: 700, color: "var(--accent-mauve)" }}>{mcSteps}</span>
+              <span style={{ fontFamily: "monospace", fontSize: 24, fontWeight: 700, color: "var(--accent-plum)" }}>{mcSteps}</span>
               <span style={{ fontSize: 11, color: "var(--text-muted)" }}>Madecraft Steps</span>
             </div>
           </div>
@@ -374,9 +374,9 @@ export default function AGCLifecycle() {
                             }}>{cfg.label}</span>
                             <span style={{
                               fontSize: 10, fontWeight: 500, padding: "2px 8px", borderRadius: 4,
-                              background: role === "author" ? "rgba(42,173,217,0.12)" : role === "system" ? "rgba(9,166,133,0.12)" : "rgba(99,64,87,0.2)",
-                              color: role === "author" ? "var(--accent-cyan)" : role === "system" ? "var(--accent-teal)" : "var(--accent-mauve)",
-                              border: `1px solid ${role === "author" ? "rgba(42,173,217,0.25)" : role === "system" ? "rgba(9,166,133,0.25)" : "rgba(205,170,186,0.25)"}`,
+                              background: role === "author" ? "rgba(26,143,184,0.08)" : role === "system" ? "rgba(9,166,133,0.08)" : "rgba(99,64,87,0.08)",
+                              color: role === "author" ? "var(--accent-blue)" : role === "system" ? "var(--accent-teal)" : "var(--accent-plum)",
+                              border: `1px solid ${role === "author" ? "rgba(26,143,184,0.25)" : role === "system" ? "rgba(9,166,133,0.25)" : "rgba(99,64,87,0.25)"}`,
                             }}>{step.who}</span>
                           </div>
                         </div>
@@ -405,9 +405,9 @@ export default function AGCLifecycle() {
             <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
               <p style={{ fontSize: 10, color: "var(--text-muted)", fontWeight: 600, marginBottom: 4 }}>Responsible Party</p>
               {[
-                { color: "var(--accent-mauve)", label: "Madecraft Staff" },
-                { color: "var(--accent-cyan)",  label: "Author (External)" },
-                { color: "var(--accent-teal)",  label: "System / Automation" },
+                { color: "var(--accent-plum)", label: "Madecraft Staff" },
+                { color: "var(--accent-blue)", label: "Author (External)" },
+                { color: "var(--accent-teal)", label: "System / Automation" },
               ].map(({ color, label }) => (
                 <div key={label} style={{ display: "flex", alignItems: "center", gap: 8 }}>
                   <div style={{ width: 9, height: 9, borderRadius: 2, background: color }} />
