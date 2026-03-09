@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 
-// ─── Templates keyed by stage ──────────────────────────────────────────────
+// ─── Templates keyed by stage ────────────────────────────────────────────────
 const TEMPLATES = {
   recruiting: [
     {
@@ -57,7 +57,7 @@ Madecraft`,
   nda_pa: [
     {
       id: "welcome",
-      label: "Welcome — Next Steps to Get Started",
+      label: "Welcome — Next Steps",
       channel: "email",
       subject: "Welcome to Madecraft — Next Steps to Get Started",
       body: `Hi {{authorName}},
@@ -268,23 +268,21 @@ Madecraft`,
   ],
 };
 
-// ─── Sample seed messages ───────────────────────────────────────────────────
+// ─── Seed messages (shown until Gmail connected) ─────────────────────────────
 const SEED_MESSAGES = [
   { id: "s1", authorId: 1, channel: "email", direction: "outbound", subject: "Welcome to Madecraft — Next Steps to Get Started", body: "Hi Sarah, welcome to Madecraft — we're so excited to be working with you! You'll be receiving an NDA and Publishing Agreement shortly via SignRequest...", timestamp: "2026-02-20T09:00:00", status: "sent" },
   { id: "s2", authorId: 1, channel: "email", direction: "inbound", subject: "Re: Welcome to Madecraft", body: "Hi Christopher! Thank you so much — I'm thrilled to be working with Madecraft. I've reviewed the documents and everything looks great. Signing now!", timestamp: "2026-02-20T11:34:00", status: "received" },
   { id: "s3", authorId: 1, channel: "email", direction: "outbound", subject: "Let's Go! Your Production Kickoff for UX Design Fundamentals", body: "Hi Sarah, we're officially in production — exciting! Here's everything you need to get started...", timestamp: "2026-02-28T10:15:00", status: "sent" },
   { id: "s4", authorId: 1, channel: "slack", direction: "outbound", subject: null, body: "📹 Footage approved and uploaded for *Sarah Mitchell* — UX Design Fundamentals (CRS-101). Ready for editing.", timestamp: "2026-03-04T14:00:00", status: "sent" },
-  { id: "s5", authorId: 2, channel: "email", direction: "outbound", subject: "Your Videos Are Approved! ✅", body: "Excellent work — your footage for Deep Learning for Everyone has been reviewed and approved! Your videos are now in the hands of our post-production team...", timestamp: "2026-02-25T09:30:00", status: "sent" },
+  { id: "s5", authorId: 2, channel: "email", direction: "outbound", subject: "Your Videos Are Approved! ✅", body: "Excellent work — your footage for Deep Learning for Everyone has been reviewed and approved!", timestamp: "2026-02-25T09:30:00", status: "sent" },
   { id: "s6", authorId: 2, channel: "email", direction: "inbound", subject: "Re: Your Videos Are Approved!", body: "Amazing! Thank you so much. Really happy with how they turned out. Can't wait to see the final edit!", timestamp: "2026-02-25T16:45:00", status: "received" },
-  { id: "s7", authorId: 3, channel: "email", direction: "outbound", subject: "Your Madecraft Contract Is On Its Way", body: "Hi Priya, great news — your Statement of Work for Mindful Leadership has been sent via SignRequest. Please check your inbox...", timestamp: "2026-02-28T11:00:00", status: "sent" },
-  { id: "s8", authorId: 4, channel: "email", direction: "outbound", subject: "Collaboration Opportunity — Madecraft", body: "Hi Marcus, I came across your work and was really impressed by your expertise in data-driven growth. We're currently developing content in this space...", timestamp: "2026-03-01T09:00:00", status: "sent" },
-  { id: "s9", authorId: 5, channel: "email", direction: "outbound", subject: "Your Course Is Live! 🚀", body: "Hi Elena, incredible news — Building Resilient Teams is now live and available to learners worldwide! You can find your course on LinkedIn Learning, Pluralsight, and Cornerstone...", timestamp: "2026-02-15T10:00:00", status: "sent" },
-  { id: "s10", authorId: 5, channel: "email", direction: "inbound", subject: "Re: Your Course Is Live!", body: "Oh my gosh this is so exciting!! Thank you Christopher and the whole Madecraft team. What an incredible experience from start to finish. Can't wait to work together again!", timestamp: "2026-02-15T12:18:00", status: "received" },
+  { id: "s7", authorId: 3, channel: "email", direction: "outbound", subject: "Your Madecraft Contract Is On Its Way", body: "Hi Priya, great news — your Statement of Work for Mindful Leadership has been sent via SignRequest.", timestamp: "2026-02-28T11:00:00", status: "sent" },
+  { id: "s8", authorId: 4, channel: "email", direction: "outbound", subject: "Collaboration Opportunity — Madecraft", body: "Hi Marcus, I came across your work and was really impressed by your expertise in data-driven growth...", timestamp: "2026-03-01T09:00:00", status: "sent" },
+  { id: "s9", authorId: 5, channel: "email", direction: "outbound", subject: "Your Course Is Live! 🚀", body: "Hi Elena, incredible news — Building Resilient Teams is now live and available to learners worldwide!", timestamp: "2026-02-15T10:00:00", status: "sent" },
+  { id: "s10", authorId: 5, channel: "email", direction: "inbound", subject: "Re: Your Course Is Live!", body: "Oh my gosh this is so exciting!! Thank you Christopher and the whole Madecraft team. What an incredible experience!", timestamp: "2026-02-15T12:18:00", status: "received" },
 ];
 
-const CHANNEL_ICONS = { email: "✉", slack: "#", note: "📝" };
-const CHANNEL_COLORS = { email: "var(--accent-blue)", slack: "#4A154B", note: "var(--accent-gold)" };
-
+// ─── Helpers ─────────────────────────────────────────────────────────────────
 function fillTemplate(text, author, senderName = "Christopher") {
   return text
     .replace(/\{\{authorName\}\}/g, author.name)
@@ -293,6 +291,12 @@ function fillTemplate(text, author, senderName = "Christopher") {
     .replace(/\{\{senderName\}\}/g, senderName)
     .replace(/\{\{topic\}\}/g, author.title || "your area of expertise");
 }
+
+function initials(name) {
+  return name.split(" ").map((w) => w[0]).join("").slice(0, 2).toUpperCase();
+}
+
+const STAGE_COLORS = {};
 
 function formatTime(ts) {
   const d = new Date(ts);
@@ -309,29 +313,75 @@ function formatFullTime(ts) {
   return new Date(ts).toLocaleString([], { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" });
 }
 
+// Avatar with color derived from name
+const AVATAR_COLORS = ["#3F80AE", "#09A685", "#DE7424", "#EA7155", "#8B5CF6", "#EC4899", "#2AADD9", "#89BD83"];
+function avatarColor(name) {
+  let hash = 0;
+  for (const ch of name) hash = (hash * 31 + ch.charCodeAt(0)) & 0xffffffff;
+  return AVATAR_COLORS[Math.abs(hash) % AVATAR_COLORS.length];
+}
+
+// ─── Sub-components ───────────────────────────────────────────────────────────
+
+function Avatar({ name, size = 36 }) {
+  const color = avatarColor(name);
+  return (
+    <div style={{
+      width: size, height: size, borderRadius: "50%",
+      background: `${color}22`, border: `1.5px solid ${color}44`,
+      display: "flex", alignItems: "center", justifyContent: "center",
+      flexShrink: 0,
+      fontSize: size * 0.33, fontWeight: 700, color,
+      fontFamily: "var(--font-inter), sans-serif",
+      letterSpacing: "0.02em",
+    }}>
+      {initials(name)}
+    </div>
+  );
+}
+
+function ConnectionBadge({ connected, label, icon }) {
+  return (
+    <div style={{
+      display: "flex", alignItems: "center", gap: 5,
+      padding: "3px 10px", borderRadius: 20, fontSize: 10, fontWeight: 600,
+      border: "1px solid",
+      borderColor: connected ? "#09A68530" : "var(--border)",
+      background: connected ? "#09A68510" : "var(--bg-surface)",
+      color: connected ? "#09A685" : "var(--text-muted)",
+    }}>
+      <span style={{ fontSize: 8, width: 6, height: 6, borderRadius: "50%", background: connected ? "#09A685" : "#555", display: "inline-block" }} />
+      {icon} {label}
+    </div>
+  );
+}
+
+// ─── Main Component ───────────────────────────────────────────────────────────
 export default function MessagingHub({ authors, stages }) {
-  const [messages, setMessages]             = useState(SEED_MESSAGES);
-  const [selectedId, setSelectedId]         = useState(authors[0]?.id || null);
-  const [search, setSearch]                 = useState("");
-  const [channelFilter, setChannelFilter]   = useState("all");
-  const [compose, setCompose]               = useState({ channel: "email", subject: "", body: "" });
+  const [messages, setMessages]           = useState(SEED_MESSAGES);
+  const [selectedId, setSelectedId]       = useState(authors[0]?.id || null);
+  const [search, setSearch]               = useState("");
+  const [channelFilter, setChannelFilter] = useState("all");
+  const [compose, setCompose]             = useState({ channel: "email", subject: "", body: "" });
   const [selectedTemplate, setSelectedTemplate] = useState("");
+  const [sending, setSending]             = useState(false);
+  const [sendStatus, setSendStatus]       = useState(null); // "ok" | "error" | null
+  const [connections, setConnections]     = useState({ gmail: false, slack: false });
+  const [loadingMsgs, setLoadingMsgs]     = useState(false);
+  const [showSettings, setShowSettings]   = useState(false);
+  const [slackChannel, setSlackChannel]   = useState("#madecraft-authors");
   const threadRef = useRef(null);
 
   const selected = authors.find((a) => a.id === selectedId);
   const stage    = stages.find((s) => s.id === selected?.stage);
-
-  // Stage templates for the selected author
   const stageTemplates = selected ? (TEMPLATES[selected.stage] || []) : [];
   const allTemplates   = Object.values(TEMPLATES).flat();
 
-  // Messages for selected author
   const thread = messages
     .filter((m) => m.authorId === selectedId)
     .filter((m) => channelFilter === "all" || m.channel === channelFilter)
     .sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
 
-  // Last message per author for sidebar preview
   const lastMsg = (authorId) => {
     const msgs = messages.filter((m) => m.authorId === authorId);
     return msgs.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))[0] || null;
@@ -345,10 +395,39 @@ export default function MessagingHub({ authors, stages }) {
     (a.courseTitle || "").toLowerCase().includes(search.toLowerCase())
   );
 
-  // Scroll thread to bottom on change
+  // Check connection status on mount
+  useEffect(() => {
+    fetch("/api/connections")
+      .then((r) => r.json())
+      .then((data) => setConnections(data))
+      .catch(() => {});
+  }, []);
+
+  // Auto-scroll thread
   useEffect(() => {
     if (threadRef.current) threadRef.current.scrollTop = threadRef.current.scrollHeight;
   }, [selectedId, thread.length]);
+
+  // Fetch real Gmail messages when author selected + gmail connected
+  useEffect(() => {
+    if (!selected?.email || !connections.gmail) return;
+    setLoadingMsgs(true);
+    fetch(`/api/gmail/messages?email=${encodeURIComponent(selected.email)}`)
+      .then((r) => r.json())
+      .then((data) => {
+        if (data.messages?.length) {
+          setMessages((prev) => {
+            const withoutSeed = prev.filter(
+              (m) => m.authorId !== selected.id || !m.id.startsWith("s")
+            );
+            const withReal = data.messages.map((m) => ({ ...m, authorId: selected.id }));
+            return [...withoutSeed, ...withReal];
+          });
+        }
+      })
+      .catch(() => {})
+      .finally(() => setLoadingMsgs(false));
+  }, [selectedId, connections.gmail]);
 
   const handleTemplateSelect = (e) => {
     const tplId = e.target.value;
@@ -363,8 +442,56 @@ export default function MessagingHub({ authors, stages }) {
     });
   };
 
-  const handleSend = () => {
+  const applyTemplate = (tpl) => {
+    setSelectedTemplate(tpl.id);
+    setCompose({
+      channel: tpl.channel,
+      subject: tpl.subject ? fillTemplate(tpl.subject, selected) : "",
+      body: fillTemplate(tpl.body, selected),
+    });
+  };
+
+  const handleSend = async () => {
     if (!compose.body.trim() || !selected) return;
+    setSending(true);
+    setSendStatus(null);
+
+    let realSent = false;
+
+    try {
+      if (compose.channel === "email" && connections.gmail && selected.email) {
+        const res = await fetch("/api/gmail/send", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            to: selected.email,
+            subject: compose.subject,
+            body: compose.body,
+          }),
+        });
+        const data = await res.json();
+        if (data.success) realSent = true;
+        else setSendStatus("error");
+      } else if (compose.channel === "slack" && connections.slack) {
+        const res = await fetch("/api/slack/send", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            channel: slackChannel,
+            text: compose.body,
+            authorName: selected.name,
+            courseTitle: selected.courseTitle,
+          }),
+        });
+        const data = await res.json();
+        if (data.success) realSent = true;
+        else setSendStatus("error");
+      }
+    } catch {
+      setSendStatus("error");
+    }
+
+    // Always add to local thread (optimistic / draft)
     const msg = {
       id: `msg-${Date.now()}`,
       authorId: selected.id,
@@ -373,42 +500,73 @@ export default function MessagingHub({ authors, stages }) {
       subject: compose.subject || null,
       body: compose.body,
       timestamp: new Date().toISOString(),
-      status: "sent",
+      status: realSent ? "sent" : "draft",
+      realSent,
     };
+
     setMessages((prev) => [...prev, msg]);
     setCompose({ channel: compose.channel, subject: "", body: "" });
     setSelectedTemplate("");
+    if (realSent) setSendStatus("ok");
+    setSending(false);
+
+    setTimeout(() => setSendStatus(null), 3000);
   };
 
-  return (
-    <div style={{ display: "flex", height: "calc(100vh - 112px)", overflow: "hidden", background: "var(--bg-primary)" }}>
+  const gmailConnected = connections.gmail;
+  const slackConnected = connections.slack;
 
-      {/* ── Left Sidebar ── */}
+  return (
+    <div style={{ display: "flex", height: "calc(100vh - 112px)", overflow: "hidden", background: "var(--bg-primary)", position: "relative" }}>
+
+      {/* ── LEFT SIDEBAR ── */}
       <div style={{
-        width: 280, flexShrink: 0,
+        width: 264, flexShrink: 0,
         borderRight: "1px solid var(--border)",
         background: "var(--bg-secondary)",
         display: "flex", flexDirection: "column",
         overflow: "hidden",
       }}>
         {/* Sidebar header */}
-        <div style={{ padding: "16px 16px 12px", borderBottom: "1px solid var(--border)" }}>
-          <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--text-muted)", margin: "0 0 10px 0" }}>
-            Authors
-          </p>
+        <div style={{ padding: "14px 14px 10px", borderBottom: "1px solid var(--border)" }}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
+            <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--text-muted)", margin: 0 }}>
+              Authors
+            </p>
+            <button
+              onClick={() => setShowSettings((v) => !v)}
+              title="Connection settings"
+              style={{
+                background: "none", border: "none", cursor: "pointer",
+                fontSize: 14, color: "var(--text-muted)", padding: "2px 4px", borderRadius: 4,
+                transition: "color 0.15s",
+              }}
+              onMouseEnter={(e) => (e.target.style.color = "var(--text-primary)")}
+              onMouseLeave={(e) => (e.target.style.color = "var(--text-muted)")}
+            >
+              ⚙
+            </button>
+          </div>
           <input
             type="text"
-            placeholder="Search..."
+            placeholder="Search authors..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             style={{
-              width: "100%", background: "var(--bg-surface)",
+              width: "100%", background: "var(--bg-card)",
               border: "1px solid var(--border)", borderRadius: 8,
-              padding: "8px 12px", fontSize: 12,
+              padding: "7px 10px", fontSize: 12,
               color: "var(--text-primary)", outline: "none",
               fontFamily: "var(--font-inter), sans-serif",
+              boxSizing: "border-box",
             }}
           />
+        </div>
+
+        {/* Connection badges */}
+        <div style={{ padding: "8px 14px", borderBottom: "1px solid var(--border)", display: "flex", gap: 6 }}>
+          <ConnectionBadge connected={gmailConnected} label="Gmail" icon="✉" />
+          <ConnectionBadge connected={slackConnected} label="Slack" icon="#" />
         </div>
 
         {/* Author list */}
@@ -425,117 +583,253 @@ export default function MessagingHub({ authors, stages }) {
                 onClick={() => setSelectedId(author.id)}
                 style={{
                   width: "100%", textAlign: "left",
-                  padding: "12px 16px",
+                  padding: "11px 14px",
                   background: isActive ? "var(--bg-surface)" : "transparent",
                   borderBottom: "1px solid var(--border)",
-                  borderLeft: isActive ? `3px solid var(--accent-coral)` : "3px solid transparent",
+                  borderLeft: isActive ? "3px solid var(--accent-coral)" : "3px solid transparent",
                   cursor: "pointer", border: "none",
                   borderBottom: "1px solid var(--border)",
-                  borderLeft: isActive ? `3px solid var(--accent-coral)` : "3px solid transparent",
+                  borderLeft: isActive ? "3px solid var(--accent-coral)" : "3px solid transparent",
                   fontFamily: "var(--font-inter), sans-serif",
                   display: "block",
+                  transition: "background 0.1s",
                 }}
               >
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 4 }}>
-                  <span style={{ fontSize: 13, fontWeight: 600, color: "var(--text-primary)", fontFamily: "var(--font-playfair), Georgia, serif" }}>
-                    {author.name}
-                  </span>
-                  <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                    {unread > 0 && (
-                      <span style={{ width: 8, height: 8, borderRadius: "50%", background: "var(--accent-coral)", flexShrink: 0, display: "inline-block" }} />
+                <div style={{ display: "flex", gap: 9, alignItems: "flex-start" }}>
+                  <Avatar name={author.name} size={34} />
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 3 }}>
+                      <span style={{ fontSize: 12, fontWeight: 600, color: "var(--text-primary)", fontFamily: "var(--font-playfair), Georgia, serif" }}>
+                        {author.name}
+                      </span>
+                      <div style={{ display: "flex", alignItems: "center", gap: 5, flexShrink: 0 }}>
+                        {unread > 0 && (
+                          <span style={{ width: 7, height: 7, borderRadius: "50%", background: "var(--accent-coral)", display: "inline-block" }} />
+                        )}
+                        <span style={{ fontSize: 9, color: "var(--text-muted)" }}>
+                          {last ? formatTime(last.timestamp) : ""}
+                        </span>
+                      </div>
+                    </div>
+                    <span style={{
+                      fontSize: 9, fontWeight: 700, padding: "1px 5px", borderRadius: 8, marginBottom: 4, display: "inline-block",
+                      background: stg ? `${stg.hex}18` : "var(--border)",
+                      color: stg?.hex || "var(--text-muted)",
+                      border: `1px solid ${stg?.hex || "var(--border)"}`,
+                    }}>{stg?.label}</span>
+                    {last && (
+                      <p style={{ fontSize: 10, color: "var(--text-muted)", margin: "3px 0 0", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                        {last.direction === "outbound" ? "You: " : ""}{last.subject || last.body}
+                      </p>
                     )}
-                    <span style={{ fontSize: 10, color: "var(--text-muted)" }}>
-                      {last ? formatTime(last.timestamp) : ""}
-                    </span>
                   </div>
                 </div>
-                <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 4 }}>
-                  <span style={{
-                    fontSize: 9, fontWeight: 700, padding: "1px 6px", borderRadius: 8,
-                    background: stg ? `${stg.hex}18` : "var(--border)",
-                    color: stg?.hex || "var(--text-muted)",
-                    border: `1px solid ${stg?.hex || "var(--border)"}`,
-                  }}>{stg?.label}</span>
-                </div>
-                {last && (
-                  <p style={{ fontSize: 11, color: "var(--text-muted)", margin: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: 220 }}>
-                    {last.direction === "outbound" ? "You: " : ""}{last.subject || last.body}
-                  </p>
-                )}
               </button>
             );
           })}
         </div>
       </div>
 
-      {/* ── Right Panel ── */}
+      {/* ── SETTINGS PANEL (slides in over sidebar) ── */}
+      {showSettings && (
+        <div style={{
+          position: "absolute", top: 0, left: 264, width: 320, height: "100%",
+          background: "var(--bg-secondary)", borderRight: "1px solid var(--border)",
+          zIndex: 10, display: "flex", flexDirection: "column",
+          boxShadow: "4px 0 20px rgba(0,0,0,0.15)",
+        }}>
+          <div style={{ padding: "16px 20px", borderBottom: "1px solid var(--border)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            <h3 style={{ margin: 0, fontSize: 14, fontWeight: 700, color: "var(--text-primary)" }}>Connections</h3>
+            <button onClick={() => setShowSettings(false)} style={{ background: "none", border: "none", cursor: "pointer", fontSize: 16, color: "var(--text-muted)" }}>✕</button>
+          </div>
+          <div style={{ flex: 1, overflowY: "auto", padding: "20px" }}>
+
+            {/* Gmail section */}
+            <div style={{ marginBottom: 28 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
+                <span style={{ fontSize: 16 }}>✉</span>
+                <h4 style={{ margin: 0, fontSize: 13, fontWeight: 700, color: "var(--text-primary)" }}>Gmail</h4>
+                <span style={{
+                  fontSize: 9, fontWeight: 700, padding: "2px 7px", borderRadius: 10,
+                  background: gmailConnected ? "#09A68515" : "var(--bg-surface)",
+                  color: gmailConnected ? "#09A685" : "var(--text-muted)",
+                  border: `1px solid ${gmailConnected ? "#09A68530" : "var(--border)"}`,
+                }}>{gmailConnected ? "Connected" : "Not Connected"}</span>
+              </div>
+              {gmailConnected ? (
+                <p style={{ fontSize: 12, color: "#09A685", margin: 0 }}>Gmail is live — emails will be sent from your account.</p>
+              ) : (
+                <>
+                  <p style={{ fontSize: 12, color: "var(--text-muted)", margin: "0 0 12px", lineHeight: 1.5 }}>
+                    Connect Gmail to send and receive real emails from inside CORE. Requires a one-time Google authorization.
+                  </p>
+                  <div style={{ background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: 8, padding: 12, fontSize: 11, color: "var(--text-muted)", lineHeight: 1.7, marginBottom: 12 }}>
+                    <strong style={{ color: "var(--text-primary)", display: "block", marginBottom: 6 }}>Setup steps:</strong>
+                    1. Go to Google Cloud Console → Create a project<br />
+                    2. Enable the Gmail API<br />
+                    3. Create OAuth 2.0 credentials (Web app)<br />
+                    4. Add redirect URI: <code style={{ color: "var(--accent-coral)" }}>https://your-site.vercel.app/api/gmail/callback</code><br />
+                    5. Add <code>GOOGLE_CLIENT_ID</code>, <code>GOOGLE_CLIENT_SECRET</code>, <code>GOOGLE_REDIRECT_URI</code> to Vercel env vars<br />
+                    6. Visit <code>/api/gmail/auth</code> to authorize → paste the refresh token back in Vercel
+                  </div>
+                  <a href="/api/gmail/auth" style={{
+                    display: "inline-block", padding: "8px 16px", borderRadius: 8,
+                    background: "var(--accent-coral)", color: "#fff", fontSize: 12, fontWeight: 600,
+                    textDecoration: "none",
+                  }}>
+                    Authorize Gmail →
+                  </a>
+                </>
+              )}
+            </div>
+
+            {/* Slack section */}
+            <div style={{ marginBottom: 28 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
+                <span style={{ fontSize: 16 }}>#</span>
+                <h4 style={{ margin: 0, fontSize: 13, fontWeight: 700, color: "var(--text-primary)" }}>Slack</h4>
+                <span style={{
+                  fontSize: 9, fontWeight: 700, padding: "2px 7px", borderRadius: 10,
+                  background: slackConnected ? "#09A68515" : "var(--bg-surface)",
+                  color: slackConnected ? "#09A685" : "var(--text-muted)",
+                  border: `1px solid ${slackConnected ? "#09A68530" : "var(--border)"}`,
+                }}>{slackConnected ? "Connected" : "Not Connected"}</span>
+              </div>
+              {slackConnected ? (
+                <>
+                  <p style={{ fontSize: 12, color: "#09A685", margin: "0 0 10px" }}>Slack is live — messages will post to your workspace.</p>
+                  <label style={{ fontSize: 11, color: "var(--text-muted)", display: "block", marginBottom: 4 }}>Default channel</label>
+                  <input
+                    value={slackChannel}
+                    onChange={(e) => setSlackChannel(e.target.value)}
+                    style={{
+                      width: "100%", background: "var(--bg-card)", border: "1px solid var(--border)",
+                      borderRadius: 8, padding: "7px 10px", fontSize: 12,
+                      color: "var(--text-primary)", outline: "none",
+                      fontFamily: "var(--font-inter), sans-serif", boxSizing: "border-box",
+                    }}
+                    placeholder="#madecraft-authors"
+                  />
+                </>
+              ) : (
+                <>
+                  <p style={{ fontSize: 12, color: "var(--text-muted)", margin: "0 0 12px", lineHeight: 1.5 }}>
+                    Connect Slack to post team notifications directly from CORE.
+                  </p>
+                  <div style={{ background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: 8, padding: 12, fontSize: 11, color: "var(--text-muted)", lineHeight: 1.7 }}>
+                    <strong style={{ color: "var(--text-primary)", display: "block", marginBottom: 6 }}>Setup steps:</strong>
+                    1. Go to api.slack.com/apps → Create New App<br />
+                    2. Add Bot Token Scopes: <code style={{ color: "var(--accent-coral)" }}>chat:write</code>, <code style={{ color: "var(--accent-coral)" }}>chat:write.public</code><br />
+                    3. Install the app to your workspace<br />
+                    4. Copy the Bot User OAuth Token<br />
+                    5. Add <code>SLACK_BOT_TOKEN</code> to Vercel env vars<br />
+                    6. Optionally set <code>SLACK_DEFAULT_CHANNEL</code>
+                  </div>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── RIGHT PANEL ── */}
       {selected ? (
         <div style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden" }}>
 
           {/* Thread header */}
           <div style={{
-            padding: "14px 24px",
+            padding: "12px 24px",
             borderBottom: "1px solid var(--border)",
             background: "var(--bg-secondary)",
             display: "flex", alignItems: "center", justifyContent: "space-between",
+            gap: 16,
           }}>
-            <div>
-              <h2 style={{
-                fontFamily: "var(--font-playfair), Georgia, serif",
-                fontSize: 20, fontWeight: 700,
-                color: "var(--text-primary)", margin: 0,
-              }}>{selected.name}</h2>
-              <div style={{ display: "flex", gap: 12, marginTop: 4, alignItems: "center" }}>
-                {selected.title && <span style={{ fontSize: 11, color: "var(--text-muted)" }}>{selected.title}</span>}
-                <span style={{
-                  fontSize: 10, fontWeight: 700, padding: "2px 8px", borderRadius: 10,
-                  background: stage ? `${stage.hex}18` : "var(--border)",
-                  color: stage?.hex || "var(--text-muted)",
-                  border: `1px solid ${stage?.hex || "var(--border)"}`,
-                }}>{stage?.label}</span>
-                {selected.courseTitle && <span style={{ fontSize: 11, color: "var(--text-muted)" }}>{selected.courseId} · {selected.courseTitle}</span>}
+            <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+              <Avatar name={selected.name} size={42} />
+              <div>
+                <h2 style={{
+                  fontFamily: "var(--font-playfair), Georgia, serif",
+                  fontSize: 18, fontWeight: 700,
+                  color: "var(--text-primary)", margin: "0 0 4px",
+                }}>{selected.name}</h2>
+                <div style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap" }}>
+                  {selected.title && <span style={{ fontSize: 11, color: "var(--text-muted)" }}>{selected.title}</span>}
+                  <span style={{
+                    fontSize: 9, fontWeight: 700, padding: "2px 8px", borderRadius: 10,
+                    background: stage ? `${stage.hex}18` : "var(--border)",
+                    color: stage?.hex || "var(--text-muted)",
+                    border: `1px solid ${stage?.hex || "var(--border)"}`,
+                  }}>{stage?.label}</span>
+                  {selected.courseTitle && (
+                    <span style={{ fontSize: 11, color: "var(--text-muted)" }}>
+                      {selected.courseId} · {selected.courseTitle}
+                    </span>
+                  )}
+                </div>
               </div>
             </div>
-            <div style={{ display: "flex", gap: 12 }}>
+            <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
+              {loadingMsgs && <span style={{ fontSize: 11, color: "var(--text-muted)" }}>Fetching emails...</span>}
               {selected.email && (
-                <a href={`mailto:${selected.email}`} style={{ fontSize: 12, color: "var(--accent-blue)", textDecoration: "none", fontWeight: 500 }}>
+                <a href={`mailto:${selected.email}`} style={{ fontSize: 11, color: "var(--accent-blue)", textDecoration: "none", fontWeight: 500 }}>
                   ✉ {selected.email}
                 </a>
               )}
               {selected.linkedin && (
-                <a href={selected.linkedin} target="_blank" rel="noopener noreferrer" style={{ fontSize: 12, color: "var(--accent-indigo)", textDecoration: "none", fontWeight: 500 }}>
+                <a href={selected.linkedin} target="_blank" rel="noopener noreferrer" style={{ fontSize: 11, color: "var(--accent-indigo)", textDecoration: "none", fontWeight: 500 }}>
                   in LinkedIn
                 </a>
               )}
             </div>
           </div>
 
-          {/* Channel filter */}
-          <div style={{ padding: "8px 24px", borderBottom: "1px solid var(--border)", background: "var(--bg-secondary)", display: "flex", gap: 6 }}>
-            {["all", "email", "slack", "note"].map((ch) => (
-              <button key={ch} onClick={() => setChannelFilter(ch)} style={{
-                padding: "4px 12px", borderRadius: 20, fontSize: 11, fontWeight: 600,
+          {/* Channel filter tabs */}
+          <div style={{
+            padding: "0 24px", borderBottom: "1px solid var(--border)",
+            background: "var(--bg-secondary)", display: "flex", gap: 0,
+          }}>
+            {[
+              { id: "all",   label: "All" },
+              { id: "email", label: "✉ Email" },
+              { id: "slack", label: "# Slack" },
+              { id: "note",  label: "📝 Notes" },
+            ].map((ch) => (
+              <button key={ch.id} onClick={() => setChannelFilter(ch.id)} style={{
+                padding: "10px 16px", fontSize: 11, fontWeight: 600,
                 cursor: "pointer", fontFamily: "var(--font-inter), sans-serif",
-                border: "1px solid",
-                borderColor: channelFilter === ch ? "var(--accent-coral)" : "var(--border)",
-                background: channelFilter === ch ? "var(--accent-coral)" : "transparent",
-                color: channelFilter === ch ? "#fff" : "var(--text-muted)",
+                border: "none", background: "none",
+                borderBottom: channelFilter === ch.id ? "2px solid var(--accent-coral)" : "2px solid transparent",
+                color: channelFilter === ch.id ? "var(--accent-coral)" : "var(--text-muted)",
+                transition: "color 0.15s",
               }}>
-                {ch === "all" ? "All" : ch === "email" ? "✉ Email" : ch === "slack" ? "# Slack" : "📝 Notes"}
+                {ch.label}
               </button>
             ))}
           </div>
 
           {/* Message thread */}
-          <div ref={threadRef} style={{ flex: 1, overflowY: "auto", padding: "24px", display: "flex", flexDirection: "column", gap: 16, background: "var(--bg-primary)" }}>
+          <div ref={threadRef} style={{
+            flex: 1, overflowY: "auto", padding: "20px 28px",
+            display: "flex", flexDirection: "column", gap: 12,
+            background: "var(--bg-primary)",
+          }}>
             {thread.length === 0 ? (
               <div style={{ textAlign: "center", color: "var(--text-muted)", paddingTop: 60 }}>
-                <p style={{ fontSize: 32, marginBottom: 8 }}>✉</p>
-                <p style={{ fontSize: 14 }}>No messages yet. Start the conversation below.</p>
+                <div style={{ fontSize: 36, marginBottom: 10 }}>✉</div>
+                <p style={{ fontSize: 14, fontWeight: 500, color: "var(--text-primary)", marginBottom: 4 }}>No messages yet</p>
+                <p style={{ fontSize: 12 }}>Start the conversation below, or pick a template.</p>
                 {stageTemplates.length > 0 && (
-                  <p style={{ fontSize: 12, marginTop: 6 }}>
-                    Suggested for <strong>{stage?.label}</strong>: <em>{stageTemplates[0]?.label}</em>
-                  </p>
+                  <div style={{ marginTop: 16, display: "flex", gap: 8, justifyContent: "center", flexWrap: "wrap" }}>
+                    {stageTemplates.map((t) => (
+                      <button key={t.id} onClick={() => applyTemplate(t)} style={{
+                        fontSize: 11, fontWeight: 600, padding: "5px 14px", borderRadius: 20,
+                        background: stage ? `${stage.hex}18` : "var(--bg-surface)",
+                        color: stage?.hex || "var(--text-primary)",
+                        border: `1px solid ${stage?.hex || "var(--border)"}40`,
+                        cursor: "pointer", fontFamily: "var(--font-inter), sans-serif",
+                      }}>{t.label}</button>
+                    ))}
+                  </div>
                 )}
               </div>
             ) : (
@@ -543,53 +837,55 @@ export default function MessagingHub({ authors, stages }) {
                 const isOut = msg.direction === "outbound";
                 const prevMsg = thread[i - 1];
                 const showDate = !prevMsg || new Date(msg.timestamp).toDateString() !== new Date(prevMsg.timestamp).toDateString();
+                const channelColor = msg.channel === "email" ? "var(--accent-blue)" : msg.channel === "slack" ? "#4A154B" : "var(--accent-gold)";
 
                 return (
                   <div key={msg.id}>
-                    {/* Date separator */}
                     {showDate && (
-                      <div style={{ textAlign: "center", margin: "8px 0" }}>
-                        <span style={{ fontSize: 10, color: "var(--text-muted)", background: "var(--bg-surface)", padding: "3px 12px", borderRadius: 20, fontWeight: 600 }}>
+                      <div style={{ textAlign: "center", margin: "6px 0 10px" }}>
+                        <span style={{
+                          fontSize: 10, color: "var(--text-muted)",
+                          background: "var(--bg-surface)", padding: "3px 12px",
+                          borderRadius: 20, fontWeight: 600,
+                        }}>
                           {new Date(msg.timestamp).toLocaleDateString([], { weekday: "long", month: "long", day: "numeric" })}
                         </span>
                       </div>
                     )}
-
-                    {/* Message bubble */}
                     <div style={{ display: "flex", justifyContent: isOut ? "flex-end" : "flex-start" }}>
-                      <div style={{ maxWidth: "72%", display: "flex", flexDirection: "column", gap: 4 }}>
-                        {/* Channel + time label */}
+                      <div style={{ maxWidth: "70%", display: "flex", flexDirection: "column", gap: 3 }}>
+                        {/* Meta */}
                         <div style={{ display: "flex", gap: 6, alignItems: "center", justifyContent: isOut ? "flex-end" : "flex-start" }}>
-                          <span style={{ fontSize: 10, color: CHANNEL_COLORS[msg.channel], fontWeight: 700 }}>
-                            {CHANNEL_ICONS[msg.channel]} {msg.channel.toUpperCase()}
+                          {!isOut && <Avatar name={selected.name} size={18} />}
+                          <span style={{ fontSize: 9, color: channelColor, fontWeight: 700 }}>
+                            {msg.channel === "email" ? "✉" : msg.channel === "slack" ? "#" : "📝"} {msg.channel.toUpperCase()}
                           </span>
-                          <span style={{ fontSize: 10, color: "var(--text-muted)" }}>
+                          <span style={{ fontSize: 9, color: "var(--text-muted)" }}>
                             {isOut ? "You" : selected.name.split(" ")[0]} · {formatFullTime(msg.timestamp)}
                           </span>
                         </div>
-
+                        {/* Bubble */}
                         <div style={{
                           background: isOut ? "var(--accent-coral)" : "var(--bg-card)",
                           color: isOut ? "#fff" : "var(--text-body)",
                           borderRadius: isOut ? "16px 16px 4px 16px" : "16px 16px 16px 4px",
-                          padding: "12px 16px",
+                          padding: "11px 15px",
                           border: isOut ? "none" : "1px solid var(--border)",
                           boxShadow: "0 1px 4px rgba(0,0,0,0.06)",
                         }}>
                           {msg.subject && (
-                            <p style={{ fontSize: 11, fontWeight: 700, margin: "0 0 6px 0", opacity: isOut ? 0.85 : 1, color: isOut ? "#fff" : "var(--text-muted)" }}>
+                            <p style={{ fontSize: 10, fontWeight: 700, margin: "0 0 5px", opacity: isOut ? 0.8 : 1, color: isOut ? "#fff" : "var(--text-muted)" }}>
                               {msg.subject}
                             </p>
                           )}
-                          <p style={{ fontSize: 13, margin: 0, lineHeight: 1.55, whiteSpace: "pre-wrap" }}>
-                            {msg.body}
-                          </p>
+                          <p style={{ fontSize: 12, margin: 0, lineHeight: 1.6, whiteSpace: "pre-wrap" }}>{msg.body}</p>
                         </div>
-
-                        {/* Pending badge for outbound when not yet connected */}
+                        {/* Status */}
                         {isOut && (
                           <span style={{ fontSize: 9, color: "var(--text-muted)", textAlign: "right" }}>
-                            Saved · Connect {msg.channel === "email" ? "Gmail" : "Slack"} to send live
+                            {msg.realSent
+                              ? (msg.channel === "email" ? "✓ Sent via Gmail" : "✓ Posted to Slack")
+                              : `Draft · Connect ${msg.channel === "email" ? "Gmail" : "Slack"} to send live`}
                           </span>
                         )}
                       </div>
@@ -600,71 +896,62 @@ export default function MessagingHub({ authors, stages }) {
             )}
           </div>
 
-          {/* ── Compose area ── */}
+          {/* ── COMPOSE AREA ── */}
           <div style={{
             borderTop: "1px solid var(--border)",
             background: "var(--bg-secondary)",
-            padding: "16px 24px",
-            display: "flex", flexDirection: "column", gap: 10,
+            padding: "14px 24px",
+            display: "flex", flexDirection: "column", gap: 8,
           }}>
             {/* Stage suggestion banner */}
             {stageTemplates.length > 0 && (
               <div style={{
-                background: stage ? `${stage.hex}10` : "var(--bg-surface)",
-                border: `1px solid ${stage?.hex || "var(--border)"}30`,
-                borderRadius: 8, padding: "8px 12px",
+                background: stage ? `${stage.hex}08` : "var(--bg-surface)",
+                border: `1px solid ${stage?.hex || "var(--border)"}25`,
+                borderRadius: 8, padding: "7px 12px",
                 display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap",
               }}>
-                <span style={{ fontSize: 11, color: "var(--text-muted)" }}>
+                <span style={{ fontSize: 10, color: "var(--text-muted)" }}>
                   Suggested for <strong style={{ color: stage?.hex }}>{stage?.label}</strong>:
                 </span>
-                {stageTemplates.slice(0, 2).map((t) => (
-                  <button key={t.id} onClick={() => {
-                    setSelectedTemplate(t.id);
-                    setCompose({
-                      channel: t.channel,
-                      subject: t.subject ? fillTemplate(t.subject, selected) : "",
-                      body: fillTemplate(t.body, selected),
-                    });
-                  }} style={{
-                    fontSize: 11, fontWeight: 600, padding: "3px 10px", borderRadius: 12,
-                    background: stage ? `${stage.hex}18` : "var(--bg-surface)",
+                {stageTemplates.slice(0, 3).map((t) => (
+                  <button key={t.id} onClick={() => applyTemplate(t)} style={{
+                    fontSize: 10, fontWeight: 600, padding: "3px 10px", borderRadius: 12,
+                    background: stage ? `${stage.hex}15` : "var(--bg-surface)",
                     color: stage?.hex || "var(--text-primary)",
-                    border: `1px solid ${stage?.hex || "var(--border)"}40`,
+                    border: `1px solid ${stage?.hex || "var(--border)"}35`,
                     cursor: "pointer", fontFamily: "var(--font-inter), sans-serif",
-                  }}>
-                    {t.label}
-                  </button>
+                  }}>{t.label}</button>
                 ))}
               </div>
             )}
 
-            {/* Controls row */}
+            {/* Channel + template row */}
             <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
-              {/* Channel selector */}
-              <div style={{ display: "flex", gap: 4 }}>
+              {/* Channel pills */}
+              <div style={{ display: "flex", gap: 3, background: "var(--bg-card)", borderRadius: 10, padding: 3, border: "1px solid var(--border)" }}>
                 {[
-                  { id: "email", label: "✉ Email" },
-                  { id: "slack", label: "# Slack" },
-                  { id: "note",  label: "📝 Note" },
+                  { id: "email", label: "✉ Email", color: "var(--accent-blue)" },
+                  { id: "slack", label: "# Slack", color: "#4A154B" },
+                  { id: "note",  label: "📝 Note",  color: "var(--accent-gold)" },
                 ].map((ch) => (
                   <button key={ch.id} onClick={() => setCompose((c) => ({ ...c, channel: ch.id }))} style={{
-                    padding: "5px 12px", borderRadius: 20, fontSize: 11, fontWeight: 600,
+                    padding: "5px 12px", borderRadius: 8, fontSize: 11, fontWeight: 600,
                     cursor: "pointer", fontFamily: "var(--font-inter), sans-serif",
-                    border: "1px solid",
-                    borderColor: compose.channel === ch.id ? CHANNEL_COLORS[ch.id] : "var(--border)",
-                    background: compose.channel === ch.id ? `${CHANNEL_COLORS[ch.id]}14` : "transparent",
-                    color: compose.channel === ch.id ? CHANNEL_COLORS[ch.id] : "var(--text-muted)",
+                    border: "none",
+                    background: compose.channel === ch.id ? ch.color : "transparent",
+                    color: compose.channel === ch.id ? "#fff" : "var(--text-muted)",
+                    transition: "all 0.15s",
                   }}>{ch.label}</button>
                 ))}
               </div>
 
               {/* Template picker */}
               <select value={selectedTemplate} onChange={handleTemplateSelect} style={{
-                background: "var(--bg-surface)", border: "1px solid var(--border)",
+                background: "var(--bg-card)", border: "1px solid var(--border)",
                 borderRadius: 8, padding: "5px 10px", fontSize: 11,
                 color: "var(--text-body)", outline: "none",
-                fontFamily: "var(--font-inter), sans-serif", cursor: "pointer", flex: 1, maxWidth: 280,
+                fontFamily: "var(--font-inter), sans-serif", cursor: "pointer", flex: 1, maxWidth: 260,
               }}>
                 <option value="">Use a template...</option>
                 {stageTemplates.length > 0 && (
@@ -681,6 +968,21 @@ export default function MessagingHub({ authors, stages }) {
                   );
                 })}
               </select>
+
+              {/* Slack channel input (when slack selected) */}
+              {compose.channel === "slack" && (
+                <input
+                  value={slackChannel}
+                  onChange={(e) => setSlackChannel(e.target.value)}
+                  placeholder="#channel"
+                  style={{
+                    background: "var(--bg-card)", border: "1px solid var(--border)",
+                    borderRadius: 8, padding: "5px 10px", fontSize: 11,
+                    color: "var(--text-primary)", outline: "none", width: 140,
+                    fontFamily: "var(--font-inter), sans-serif",
+                  }}
+                />
+              )}
             </div>
 
             {/* Subject (email only) */}
@@ -703,48 +1005,67 @@ export default function MessagingHub({ authors, stages }) {
 
             {/* Body */}
             <textarea
-              placeholder={compose.channel === "slack" ? "Message to post in Slack..." : compose.channel === "note" ? "Add an internal note..." : "Write your message..."}
+              placeholder={
+                compose.channel === "slack" ? "Message to post in Slack..." :
+                compose.channel === "note"  ? "Add an internal note (only visible to Madecraft team)..." :
+                "Write your message..."
+              }
               value={compose.body}
               onChange={(e) => setCompose((c) => ({ ...c, body: e.target.value }))}
-              rows={5}
+              rows={4}
               style={{
                 background: "var(--bg-card)", border: "1px solid var(--border)",
-                borderRadius: 8, padding: "10px 12px", fontSize: 13,
+                borderRadius: 8, padding: "10px 12px", fontSize: 12,
                 color: "var(--text-primary)", outline: "none", resize: "vertical",
-                fontFamily: "var(--font-inter), sans-serif", lineHeight: 1.55,
+                fontFamily: "var(--font-inter), sans-serif", lineHeight: 1.6,
               }}
               onFocus={(e) => (e.target.style.borderColor = "var(--accent-coral)")}
               onBlur={(e) => (e.target.style.borderColor = "var(--border)")}
+              onKeyDown={(e) => {
+                if ((e.metaKey || e.ctrlKey) && e.key === "Enter") handleSend();
+              }}
             />
 
             {/* Send row */}
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-              <span style={{ fontSize: 10, color: "var(--text-muted)" }}>
-                {compose.channel === "email" ? "✉ Gmail not connected — will save as draft" :
-                 compose.channel === "slack" ? "# Slack not connected — will save locally" :
-                 "📝 Internal note — visible to Madecraft team only"}
-              </span>
+              <div style={{ fontSize: 10, color: "var(--text-muted)" }}>
+                {sendStatus === "ok" && <span style={{ color: "#09A685", fontWeight: 600 }}>✓ Message sent!</span>}
+                {sendStatus === "error" && <span style={{ color: "var(--accent-coral)", fontWeight: 600 }}>⚠ Send failed — check connections</span>}
+                {!sendStatus && (
+                  compose.channel === "email"
+                    ? (gmailConnected ? "✉ Will send via Gmail · ⌘↵ to send" : "✉ Gmail not connected — saves as draft · Connect in ⚙")
+                    : compose.channel === "slack"
+                    ? (slackConnected ? "# Will post to Slack · ⌘↵ to send" : "# Slack not connected — saves locally · Connect in ⚙")
+                    : "📝 Internal note — visible to Madecraft team only"
+                )}
+              </div>
               <button
                 onClick={handleSend}
-                disabled={!compose.body.trim()}
+                disabled={!compose.body.trim() || sending}
                 style={{
-                  background: compose.body.trim() ? "var(--accent-coral)" : "var(--border)",
-                  color: compose.body.trim() ? "#fff" : "var(--text-muted)",
+                  background: compose.body.trim() && !sending ? "var(--accent-coral)" : "var(--border)",
+                  color: compose.body.trim() && !sending ? "#fff" : "var(--text-muted)",
                   border: "none", borderRadius: "var(--radius-btn)",
-                  padding: "9px 24px", fontSize: 13, fontWeight: 600,
-                  cursor: compose.body.trim() ? "pointer" : "default",
+                  padding: "9px 22px", fontSize: 12, fontWeight: 600,
+                  cursor: compose.body.trim() && !sending ? "pointer" : "default",
                   fontFamily: "var(--font-inter), sans-serif",
                   transition: "background 0.15s",
+                  minWidth: 100,
                 }}
               >
-                {compose.channel === "email" ? "Send Email" : compose.channel === "slack" ? "Post to Slack" : "Save Note"}
+                {sending ? "Sending..." :
+                 compose.channel === "email" ? "Send Email" :
+                 compose.channel === "slack" ? "Post to Slack" : "Save Note"}
               </button>
             </div>
           </div>
         </div>
       ) : (
         <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", color: "var(--text-muted)" }}>
-          <p>Select an author to view messages</p>
+          <div style={{ textAlign: "center" }}>
+            <div style={{ fontSize: 40, marginBottom: 10 }}>✉</div>
+            <p style={{ fontSize: 14 }}>Select an author to view messages</p>
+          </div>
         </div>
       )}
     </div>
