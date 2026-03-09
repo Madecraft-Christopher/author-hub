@@ -1,5 +1,6 @@
 import "./globals.css";
 import { Playfair_Display, Inter } from "next/font/google";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 
 const playfair = Playfair_Display({
   subsets: ["latin"],
@@ -23,6 +24,7 @@ export default function RootLayout({ children }) {
     <html lang="en" className={`${playfair.variable} ${inter.variable}`}>
       <body className="min-h-screen antialiased" style={{ background: "var(--bg-primary)", color: "var(--text-primary)" }}>
         {children}
+        <SpeedInsights />
       </body>
     </html>
   );
