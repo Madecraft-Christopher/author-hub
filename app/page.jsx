@@ -4,6 +4,7 @@ import { useState } from "react";
 import AuthorCard from "../components/AuthorCard";
 import AddAuthorModal from "../components/AddAuthorModal";
 import AGCLifecycle from "../components/AGCLifecycle";
+import MessagingHub from "../components/MessagingHub";
 
 export const STAGES = [
   { id: "recruiting",         label: "Recruiting",                hex: "#3F80AE" },
@@ -93,8 +94,9 @@ const SAMPLE_AUTHORS = [
 ];
 
 const TABS = [
-  { id: "process", label: "Process Map" },
-  { id: "authors", label: "Authors" },
+  { id: "process",   label: "Process Map" },
+  { id: "authors",   label: "Authors" },
+  { id: "messages",  label: "Messages" },
 ];
 
 export default function Home() {
@@ -221,7 +223,8 @@ export default function Home() {
       {/* ── Content ── */}
       <div className="flex-1 overflow-auto">
 
-        {activeTab === "process" && <AGCLifecycle />}
+        {activeTab === "process"  && <AGCLifecycle />}
+        {activeTab === "messages" && <MessagingHub authors={authors} stages={STAGES} />}
 
         {activeTab === "authors" && (
           <div>
