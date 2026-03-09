@@ -1,11 +1,13 @@
 "use client";
 
 import { useState } from "react";
+import EditAuthorModal from "./EditAuthorModal";
 
 export default function AuthorCard({ author, stages, onUpdate, onDelete }) {
   const [expanded, setExpanded] = useState(false);
   const [editingNotes, setEditingNotes] = useState(false);
   const [noteDraft, setNoteDraft] = useState(author.notes);
+  const [showEdit, setShowEdit] = useState(false);
 
   const stage = stages.find((s) => s.id === author.stage);
   const stageIndex = stages.findIndex((s) => s.id === author.stage);
@@ -30,6 +32,7 @@ export default function AuthorCard({ author, stages, onUpdate, onDelete }) {
   };
 
   return (
+    <>
     <div
       style={card}
       onMouseEnter={(e) => (e.currentTarget.style.borderColor = "var(--border-hover)")}
@@ -207,22 +210,34 @@ export default function AuthorCard({ author, stages, onUpdate, onDelete }) {
           )}
         </div>
 
-        {/* Actions toggle */}
-        <button
-          onClick={() => setExpanded(!expanded)}
-          style={{
-            fontSize: 11,
-            color: "var(--text-muted)",
-            background: "none",
-            border: "none",
-            cursor: "pointer",
-            textAlign: "left",
-            padding: 0,
-            fontFamily: "var(--font-inter), sans-serif",
-          }}
-        >
-          {expanded ? "Hide actions ▲" : "Actions ▼"}
-        </button>
+        {/* Bottom action row */}
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+          <button
+            onClick={() => setExpanded(!expanded)}
+            style={{
+              fontSize: 11, color: "var(--text-muted)", background: "none",
+              border: "none", cursor: "pointer", padding: 0,
+              fontFamily: "var(--font-inter), sans-serif",
+            }}
+          >
+            {expanded ? "Hide ▲" : "Quick edit ▼"}
+          </button>
+          <button
+            onClick={() => setShowEdit(true)}
+            style={{
+              fontSize: 11, fontWeight: 600,
+              color: "var(--accent-coral)",
+              background: "rgba(222,116,36,0.1)",
+              border: "1px solid rgba(222,116,36,0.3)",
+              borderRadius: 20,
+              padding: "4px 12px",
+              cursor: "pointer",
+              fontFamily: "var(--font-inter), sans-serif",
+            }}
+          >
+            Edit
+          </button>
+        </div>
 
         {expanded && (
           <div style={{ borderTop: "1px solid var(--border)", paddingTop: 12, display: "flex", flexDirection: "column", gap: 8 }}>
@@ -283,5 +298,15 @@ export default function AuthorCard({ author, stages, onUpdate, onDelete }) {
         )}
       </div>
     </div>
+
+    {showEdit && (
+      <EditAuthorModal
+        author={author}
+        stages={stages}
+        onSave={(id, updates) => { onUpdate(id, updates); setShowEdit(false); }}
+        onClose={() => setShowEdit(false)}
+      />
+    )}
+    </>
   );
 }
