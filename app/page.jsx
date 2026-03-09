@@ -7,17 +7,19 @@ import AGCLifecycle from "../components/AGCLifecycle";
 import MessagingHub from "../components/MessagingHub";
 
 export const STAGES = [
-  { id: "recruiting",         label: "Recruiting",                hex: "#3F80AE" },
+  { id: "recruiting",         label: "Prospecting",               hex: "#3F80AE" },
   { id: "nda_pa",             label: "NDA / PA",                  hex: "#2AADD9" },
   { id: "content_alignment",  label: "Content Alignment",         hex: "#09A685" },
+  { id: "waitlisted",         label: "Waitlisted",                hex: "#888888" },
   { id: "contracting",        label: "Contracting",               hex: "#89BD83" },
-  { id: "pre_production",     label: "Pre-Production",            hex: "#EDD062" },
-  { id: "recording",          label: "Recording & Handoff",       hex: "#DE7424" },
+  { id: "pre_production",     label: "Recording Prep",            hex: "#EDD062" },
+  { id: "recording",          label: "Recording",                 hex: "#DE7424" },
   { id: "editing",            label: "Editing",                   hex: "#A9260F" },
   { id: "qa_transcripts",     label: "QA + Transcripts",          hex: "#CDAABA" },
   { id: "revisions",          label: "Revisions",                 hex: "#634057" },
-  { id: "regression_testing", label: "Regression Testing & DTOC", hex: "#3D3D7C" },
+  { id: "regression_testing", label: "Done (AGC) / Delivery",     hex: "#3D3D7C" },
   { id: "delivery_payment",   label: "Delivery & Payment",        hex: "#EFE9D3" },
+  { id: "offboarding",        label: "Offboarding / Sunset",      hex: "#444444" },
 ];
 
 const SAMPLE_AUTHORS = [
@@ -223,7 +225,7 @@ export default function Home() {
       {/* ── Content ── */}
       <div className="flex-1 overflow-auto">
 
-        {activeTab === "process"  && <AGCLifecycle />}
+        {activeTab === "process"  && <AGCLifecycle authors={authors} stages={STAGES} />}
         {activeTab === "messages" && <MessagingHub authors={authors} stages={STAGES} />}
 
         {activeTab === "authors" && (

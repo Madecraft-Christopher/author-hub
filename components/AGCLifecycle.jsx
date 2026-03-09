@@ -8,184 +8,213 @@ const FIGMA_EMBED = `https://www.figma.com/embed?embed_host=share&url=${encodeUR
 const phases = [
   {
     id: "recruiting",
-    label: "1. Recruiting & Prospecting",
+    label: "1. Prospecting",
     color: "#3F80AE",
     icon: "🔍",
+    monday: "New Recruits (All Content) · Prospective Experts",
     steps: [
-      { text: "Source author on LinkedIn, TikTok, YouTube, or referral", who: "Recruiter / Producer", type: "manual" },
-      { text: "Send personalized outreach message (DM, InMail, email)", who: "Recruiter / Producer", type: "manual" },
-      { text: "Author fills out Monday.com application form", who: "Author", type: "manual" },
-      { text: "Card auto-created in Monday → Prospective Authors board", who: "Monday.com", type: "automated" },
-      { text: "Author ID auto-assigned & creation date populated", who: "Monday.com", type: "automated" },
-      { text: "Producer reviews sample video & social profiles", who: "Producer", type: "manual" },
-      { text: "Decision: Approve, Request 2nd Sample, or Reject", who: "Producer", type: "manual", decision: true },
-      { text: "If rejected → send rejection email template from Monday", who: "Producer", type: "manual" },
-      { text: "If 2nd sample needed → send request email; author resubmits", who: "Producer + Author", type: "manual" },
-      { text: "Producer confirms Author ID is not a duplicate before advancing", who: "Producer", type: "manual" },
+      { text: "Expert submits application form", who: "Expert", type: "manual" },
+      { text: "Manager assigns Producer to Prospect", who: "Manager", type: "manual" },
+      { text: "Producer reviews teaching sample", who: "Producer", type: "manual" },
+      { text: "Greenlight team reviews sample", who: "Greenlight Team", type: "manual" },
+      { text: "Decision: Approved / Not Approved / Request 2nd Sample", who: "Producer + Greenlight", type: "manual", decision: true },
+      { text: "If Not Approved → Expert is not a good fit → Offboarding/Sunset", who: "Producer", type: "manual", exit: true },
+      { text: "If 2nd Sample needed → Producer sends request; Expert resubmits", who: "Producer + Expert", type: "manual" },
+      { text: "Signal Flare team reviews 2nd sample", who: "Signal Flare", type: "manual" },
+      { text: "Signal Flare Approved → advance to NDA", who: "Signal Flare", type: "manual", decision: true },
+      { text: "If Signal Flare Not Approved → Offboarding/Sunset", who: "Producer", type: "manual", exit: true },
     ],
   },
   {
-    id: "nda",
+    id: "nda_pa",
     label: "2. NDA & Publishing Agreement",
     color: "#2AADD9",
     icon: "📝",
+    monday: "New AGC Recruit",
     steps: [
       { text: "Producer moves card to \"Approved / NDA & PA Sent\"", who: "Producer", type: "manual" },
-      { text: "Acquisition phase auto-updates to Approved", who: "Monday.com", type: "automated" },
-      { text: "NDA & Publishing Agreement auto-sent via SignRequest", who: "SignRequest", type: "automated" },
-      { text: "Author record auto-created in Monday → Authors board", who: "Monday.com", type: "automated" },
-      { text: "Producer sends welcome email: \"Next Steps to Get Started\"", who: "Producer", type: "manual" },
-      { text: "Author signs NDA & Publishing Agreement", who: "Author", type: "manual" },
-      { text: "Signed PDFs auto-attached to card; card auto-moves to \"Signed\"", who: "Monday.com + SignRequest", type: "automated" },
-      { text: "Producer moves card to Content Alignment", who: "Producer", type: "manual" },
+      { text: "NDA & Publishing Agreement sent to Expert via SignRequest", who: "SignRequest", type: "automated" },
+      { text: "Expert signs NDA & Publishing Agreement", who: "Expert", type: "manual" },
+      { text: "Signed PDFs auto-attached; card moves to NDA & PA Signed", who: "Monday.com + SignRequest", type: "automated" },
+      { text: "If Expert becomes unresponsive → Offboarding/Sunset", who: "Producer", type: "manual", exit: true },
     ],
   },
   {
-    id: "alignment",
+    id: "content_alignment",
     label: "3. Content Alignment",
-    color: "#89BD83",
+    color: "#09A685",
     icon: "🎯",
+    monday: "New AGC Recruit",
     steps: [
-      { text: "Producer aligns with author on 1–2 course topics (Taxonomy guidelines)", who: "Producer + Author", type: "manual" },
-      { text: "If no aligned topics → move author to Waitlist until new taxonomy order", who: "Producer", type: "manual" },
-      { text: "Producer requests author profile: headshot, bio, on-screen lower third", who: "Producer", type: "manual" },
-      { text: "Author submits profile assets", who: "Author", type: "manual" },
-      { text: "Producer sends course proposal email with topics & compensation", who: "Producer", type: "manual" },
-      { text: "Author confirms course proposal", who: "Author", type: "manual" },
-      { text: "Producer adds author info (bios, headshot) to Monday → Authors", who: "Producer", type: "manual" },
+      { text: "Producer meets with Expert to confirm course selection, compensation, and recording date", who: "Producer + Expert", type: "manual" },
+      { text: "Decision: Do courses align with Expert's expertise?", who: "Producer", type: "manual", decision: true },
+      { text: "If no courses align → move Expert to Waitlisted for Content Alignment", who: "Producer", type: "manual", exit: true },
+      { text: "Expert agrees to terms (course, comp, dates)", who: "Expert", type: "manual" },
+      { text: "Advance to In Courses / Course Contracts", who: "Producer", type: "manual" },
+    ],
+  },
+  {
+    id: "waitlisted",
+    label: "Waitlisted for Content Alignment",
+    color: "#888888",
+    icon: "⏸",
+    monday: "New AGC Recruit",
+    steps: [
+      { text: "No current courses align with Expert's area of expertise", who: "Producer", type: "manual" },
+      { text: "Expert placed on hold until new taxonomy order is available", who: "Producer", type: "manual" },
+      { text: "Producer monitors taxonomy updates; re-engages Expert when a fit appears", who: "Producer", type: "manual" },
+      { text: "If Expert becomes unresponsive during wait → Offboarding/Sunset", who: "Producer", type: "manual", exit: true },
     ],
   },
   {
     id: "contracting",
-    label: "4. Contracting",
-    color: "#09A685",
+    label: "4. Course Contracts",
+    color: "#89BD83",
     icon: "📄",
+    monday: "Course Contracts · All AGC Courses",
     steps: [
-      { text: "Producer reserves Course ID(s) in Monday → Courses → AGC Course Contracts", who: "Producer", type: "manual" },
-      { text: "Producer fills in all course metadata (title, target month, amount, etc.)", who: "Producer", type: "manual" },
-      { text: "Producer moves card to \"Contracts Sent\"", who: "Producer", type: "manual" },
-      { text: "SOW auto-created and sent to author via SignRequest", who: "Monday.com + SignRequest", type: "automated" },
-      { text: "\"SOW\" appears in SR column; Producer gets confirmation email", who: "Monday.com", type: "automated" },
-      { text: "Producer sends \"Contracts Coming Your Way\" email to author", who: "Producer", type: "manual" },
-      { text: "Author signs SOW contract(s)", who: "Author", type: "manual" },
-      { text: "Contract Signed Date auto-populated; card auto-moves to \"Contracts Signed\"", who: "Monday.com + SignRequest", type: "automated" },
-      { text: "PDF copy of signed SOW auto-attached to card", who: "Monday.com", type: "automated" },
-      { text: "Producer receives confirmation email that contracts are signed", who: "Monday.com", type: "automated" },
+      { text: "Manager assigns Producer to Prospect (if not already assigned)", who: "Manager", type: "manual" },
+      { text: "Producer secures courses and reserves Course ID(s) in Monday → Course Contracts", who: "Producer", type: "manual" },
+      { text: "Producer meets with Expert to finalize course details", who: "Producer + Expert", type: "manual" },
+      { text: "Producer sends SOW contract(s) via SignRequest", who: "Producer + SignRequest", type: "automated" },
+      { text: "Expert reviews SOW(s)", who: "Expert", type: "manual" },
+      { text: "Decision: Expert signs / Expert requests changes / Expert becomes unresponsive", who: "Expert", type: "manual", decision: true },
+      { text: "If Expert requests contract changes → Producer negotiates; resubmits", who: "Producer + Expert", type: "manual" },
+      { text: "If Expert becomes unresponsive → Offboarding/Sunset", who: "Producer", type: "manual", exit: true },
+      { text: "Expert signs SOW(s) → Contracts Signed", who: "Expert", type: "manual" },
+      { text: "Contract Signed Date auto-populated; card moves to Contracts Signed", who: "Monday.com + SignRequest", type: "automated" },
+      { text: "If Author drops out → Offboarding/Sunset", who: "Producer", type: "manual", exit: true },
     ],
   },
   {
-    id: "preproduction",
-    label: "5. Pre-Production",
+    id: "pre_production",
+    label: "5. Recording Prep (In Production)",
     color: "#EDD062",
     icon: "🎬",
+    monday: "AGC Pre-Production · All AGC Courses",
     steps: [
-      { text: "Producer moves card to \"In Production\" and clicks \"Begin Production\"", who: "Producer", type: "manual" },
-      { text: "Acquisition status auto-updates to \"In Production\"; course enters AGC Kanban", who: "Monday.com", type: "automated" },
-      { text: "Producer sends production kickoff email (training videos, outline, checklist)", who: "Producer", type: "manual" },
-      { text: "Producer prepares Google Drive course folder & shares with author", who: "Producer", type: "manual" },
-      { text: "Producer adds course outline link to Monday Kanban card", who: "Producer", type: "manual" },
-      { text: "Author reviews outline and finalizes bullet points for each lesson", who: "Author", type: "manual" },
-      { text: "Author records & submits rehearsal video", who: "Author", type: "manual" },
-      { text: "Producer reviews rehearsal: tech setup, framing, lighting, audio", who: "Producer", type: "manual" },
-      { text: "Producer sends \"You're Ready to Record!\" email", who: "Producer", type: "manual" },
-      { text: "Producer moves card from Recording Prep → Recording", who: "Producer", type: "manual" },
+      { text: "Producer enters course into production in Monday Kanban", who: "Producer", type: "manual" },
+      { text: "Producer prepares course materials and Google Drive course folder", who: "Producer", type: "manual" },
+      { text: "Producer sends pre-production kickoff email to Expert", who: "Producer", type: "manual" },
+      { text: "Producer reviews course outlines with Expert", who: "Producer + Expert", type: "manual" },
+      { text: "Expert records and submits rehearsal video", who: "Expert", type: "manual" },
+      { text: "Producer reviews rehearsal video (tech setup, framing, lighting, audio)", who: "Producer", type: "manual" },
+      { text: "Producer submits rehearsal to Signal Flare for review", who: "Producer", type: "manual" },
+      { text: "Signal Flare team reviews rehearsal sample", who: "Signal Flare", type: "manual" },
+      { text: "Decision: Signal Flare Approved / Not Approved", who: "Signal Flare", type: "manual", decision: true },
+      { text: "If Not Approved → Offboarding/Sunset", who: "Producer", type: "manual", exit: true },
+      { text: "Signal Flare Approved → Producer sends \"You're Ready to Record!\" email", who: "Producer", type: "manual" },
+      { text: "If Expert becomes unresponsive → Offboarding/Sunset", who: "Producer", type: "manual", exit: true },
     ],
   },
   {
     id: "recording",
-    label: "6. Recording & Footage Handoff",
+    label: "6. Recording",
     color: "#DE7424",
     icon: "📹",
+    monday: "AGC Pre-Production · All AGC Courses",
     steps: [
-      { text: "Author records all course videos at home (vertical, 4K/1080p, 60s+ per lesson)", who: "Author", type: "manual" },
-      { text: "Author uploads final videos to shared Google Drive folder", who: "Author", type: "manual" },
-      { text: "Producer reviews videos against acceptance criteria (video, audio, content, performance)", who: "Producer", type: "manual" },
-      { text: "If re-records needed → Producer requests revisions; author re-records", who: "Producer + Author", type: "manual" },
-      { text: "Producer downloads footage & uploads to LucidLink → AGC Footage Drop", who: "Producer", type: "manual" },
-      { text: "Producer pastes footage link into Monday Kanban card", who: "Producer", type: "manual" },
-      { text: "Producer uploads author headshot to Monday card", who: "Producer", type: "manual" },
-      { text: "Producer sends \"Your Videos Are Approved!\" email", who: "Producer", type: "manual" },
-      { text: "Producer moves card from Recording → Ready for Editing", who: "Producer", type: "manual" },
-      { text: "Payment invoice auto-generated; payment status → \"Requested\"", who: "Monday.com", type: "automated" },
-      { text: "\"Ready for Editing\" notification auto-sent to Production Team", who: "Monday.com", type: "automated" },
+      { text: "Expert records all course videos (vertical, 4K/1080p) and uploads to Google Drive", who: "Expert", type: "manual" },
+      { text: "Producer reviews submitted videos against acceptance criteria", who: "Producer", type: "manual" },
+      { text: "Decision: Videos approved / Re-records needed", who: "Producer", type: "manual", decision: true },
+      { text: "If re-records needed → Producer requests revisions; Expert re-records and resubmits", who: "Producer + Expert", type: "manual" },
+      { text: "Producer approves videos", who: "Producer", type: "manual" },
+      { text: "Payment Requested — payment invoice auto-generated in Monday", who: "Monday.com", type: "automated" },
+      { text: "Final Frame.io review requested", who: "Producer", type: "manual" },
+      { text: "Card moves to Ready for Editing", who: "Producer", type: "manual" },
+      { text: "If Author drops out → Offboarding/Sunset", who: "Producer", type: "manual", exit: true },
     ],
   },
   {
     id: "editing",
-    label: "7. Editing (Post-Production)",
+    label: "7. Editing",
     color: "#A9260F",
     icon: "✂️",
+    monday: "All AGC Courses",
     steps: [
-      { text: "Mgr. of Post-Production or Senior Editor assigns an editor", who: "Post-Production Mgr", type: "manual" },
-      { text: "Editor reviews footage against acceptance criteria", who: "Editor", type: "manual" },
-      { text: "Editor creates course folder from AGC template in LucidLink", who: "Editor", type: "manual" },
-      { text: "Editor moves footage from Footage Drop into course folder", who: "Editor", type: "manual" },
-      { text: "Editor performs narrative edit, audio/color processing, caption overlays", who: "Editor", type: "manual" },
-      { text: "Editor exports draft & uploads to Frame.io → For Review", who: "Editor", type: "manual" },
-      { text: "Editor creates Frame.io review link and adds QA link to Monday card", who: "Editor", type: "manual" },
-      { text: "Editor adds course duration to QA Roadmap spreadsheet", who: "Editor", type: "manual" },
-      { text: "Editor moves card from Editing → QA + Transcripts", who: "Editor", type: "manual" },
+      { text: "Manager assigns Editor to course", who: "Manager", type: "manual" },
+      { text: "Editor reviews footage", who: "Editor", type: "manual" },
+      { text: "Decision: Footage approved / Not approved", who: "Editor", type: "manual", decision: true },
+      { text: "If footage NOT approved → flagged for Producer review / re-records", who: "Editor + Producer", type: "manual", exit: true },
+      { text: "Editor performs narrative cuts and storyboard/GFX export", who: "Editor", type: "manual" },
+      { text: "Editor performs color grading and audio processing", who: "Editor", type: "manual" },
+      { text: "Editor exports draft and uploads to Frame.io for review", who: "Editor", type: "manual" },
+      { text: "Editing Complete — card moves to QA & Transcripts", who: "Editor", type: "manual" },
     ],
   },
   {
-    id: "qa",
+    id: "qa_transcripts",
     label: "8. QA + Transcripts",
     color: "#CDAABA",
     icon: "🔎",
+    monday: "All AGC Courses",
     steps: [
-      { text: "Director of Content Production reviews videos in Frame.io (color, audio, graphics, bugs)", who: "Director of Content Prod.", type: "manual" },
-      { text: "Transcript QA editor reviews & revises transcripts", who: "QA Editor", type: "manual" },
-      { text: "QA reviewer marks QA status \"Done\" in Monday", who: "Director / QA Reviewer", type: "manual" },
-      { text: "Transcript editor marks Transcript status \"Done\" in Monday", who: "QA Editor", type: "manual" },
-      { text: "Card auto-moves to Revisions when both QA & Transcripts are Done", who: "Monday.com", type: "automated" },
+      { text: "Producer QAs footage in Frame.io (color, audio, graphics, pacing)", who: "Producer", type: "manual" },
+      { text: "Transcripts are audited and revised by QA editor", who: "QA Editor", type: "manual" },
+      { text: "QA and Transcript statuses both marked Done in Monday", who: "Producer + QA Editor", type: "manual" },
+      { text: "Card auto-moves to Revisions & Finalization", who: "Monday.com", type: "automated" },
     ],
   },
   {
     id: "revisions",
-    label: "9. Revisions & Final Export",
+    label: "9. Revisions & Finalization",
     color: "#634057",
     icon: "🔧",
+    monday: "All AGC Courses",
     steps: [
-      { text: "Editor addresses all Frame.io feedback and corrects bugs", who: "Editor", type: "manual" },
-      { text: "Editor exports final _NT .mp4 files and .srt caption files", who: "Editor", type: "manual" },
+      { text: "Editor addresses all QA feedback from Frame.io", who: "Editor", type: "manual" },
+      { text: "Editor exports final .mp4 and .srt caption files", who: "Editor", type: "manual" },
       { text: "Editor saves finals to LucidLink → Course Folder → Delivery", who: "Editor", type: "manual" },
-      { text: "Editor uploads final files to Frame.io → Final folder; adds review link to Monday", who: "Editor", type: "manual" },
-      { text: "Editor creates Google Sheet transcript from template", who: "Editor", type: "manual" },
-      { text: "Editor verifies lesson count and final duration", who: "Editor", type: "manual" },
-      { text: "Editor updates AGC Kanban → Editing Complete & Production Status → Done (AGC)", who: "Editor", type: "manual" },
+      { text: "Course is finalized — Editing Complete status updated in Monday", who: "Editor", type: "manual" },
     ],
   },
   {
-    id: "regression",
-    label: "10. Regression Testing & DTOC",
+    id: "regression_testing",
+    label: "10. Done (AGC) — Regression & DTOC",
     color: "#3D3D7C",
     icon: "✅",
+    monday: "All AGC Courses",
     steps: [
-      { text: "Producer performs regression testing: compares V2 edits against V1 QA comments in Frame.io", who: "Producer", type: "manual" },
-      { text: "If errors found → tag editor + Mike in Monday; editor re-exports; producer re-tests", who: "Producer + Editor", type: "manual" },
-      { text: "Producer opens DTOC link; confirms SRT data in column J", who: "Producer", type: "manual" },
-      { text: "Producer runs Auto DTOC tool → generates chapter/lesson names & learning goals", who: "Auto DTOC Script", type: "semi-automated" },
-      { text: "Producer QAs all generated chapter names, lesson names, and learning goals", who: "Producer", type: "manual" },
+      { text: "Producer performs regression testing: compares V2 edits vs. V1 QA comments in Frame.io", who: "Producer", type: "manual" },
+      { text: "If errors found → Producer tags Editor in Monday; Editor re-exports; Producer re-tests", who: "Producer + Editor", type: "manual" },
+      { text: "Producer opens DTOC link and confirms SRT data", who: "Producer", type: "manual" },
+      { text: "Producer runs Auto DTOC tool → generates chapter/lesson names and learning goals", who: "Auto DTOC Script", type: "semi-automated" },
+      { text: "Producer QAs all generated DTOC fields (names, goals, metadata)", who: "Producer", type: "manual" },
       { text: "Producer runs \"Generate Course Metadata\" → descriptions, audience, tags, subjects", who: "Auto DTOC Script", type: "semi-automated" },
-      { text: "Producer QAs all metadata fields (descriptions, personas, keywords, subjects, thumbnail)", who: "Producer", type: "manual" },
       { text: "Producer runs \"Replace Variables\" via TOC-to-JSON extension", who: "TOC-to-JSON Extension", type: "semi-automated" },
       { text: "Producer runs spell check on all DTOC pages", who: "Producer", type: "manual" },
-      { text: "Producer marks Production Status \"Done (AGC)\" in Monday", who: "Producer", type: "manual" },
+      { text: "Producer marks Production Status → \"Done (AGC)\" in Monday", who: "Producer", type: "manual" },
     ],
   },
   {
-    id: "delivery",
+    id: "delivery_payment",
     label: "11. Delivery & Payment",
     color: "#09A685",
     icon: "🚀",
+    monday: "Delivery · All AGC Courses",
     steps: [
       { text: "Delivery request auto-sent when Production Status marked \"Done (AGC)\"", who: "Monday.com", type: "automated" },
-      { text: "Course uploaded to S3 & archived on SAN", who: "Delivery / Ops", type: "manual" },
+      { text: "Course uploaded to S3 and archived on SAN", who: "Delivery / Ops", type: "manual" },
       { text: "Course delivered to partner platforms (LinkedIn Learning, Pluralsight, Cornerstone, etc.)", who: "Delivery / Ops", type: "manual" },
-      { text: "Producer confirms total contract amount & downloads payment invoice from Monday", who: "Producer", type: "manual" },
-      { text: "Producer edits invoice PDF with payment-due amount, re-uploads to Monday", who: "Producer", type: "manual" },
-      { text: "Producer emails invoice to Finance (Marisa) for payment processing", who: "Producer", type: "manual" },
-      { text: "Finance processes payment to author (target: within 2 weeks of recording)", who: "Finance (Marisa)", type: "manual" },
+      { text: "Producer confirms total contract amount and downloads payment invoice from Monday", who: "Producer", type: "manual" },
+      { text: "Producer edits invoice PDF and re-uploads to Monday", who: "Producer", type: "manual" },
+      { text: "Producer emails invoice to Finance for payment processing", who: "Producer", type: "manual" },
+      { text: "Finance processes payment to Expert", who: "Finance", type: "manual" },
+    ],
+  },
+  {
+    id: "offboarding",
+    label: "Offboarding / Sunset",
+    color: "#444444",
+    icon: "🌅",
+    monday: "N/A",
+    steps: [
+      { text: "Expert becomes unresponsive at any stage → Producer initiates offboarding", who: "Producer", type: "manual" },
+      { text: "Expert is not approved after sample review → exits process", who: "Producer + Greenlight", type: "manual" },
+      { text: "Expert agrees to terms then drops out → card moved to Sunset", who: "Producer", type: "manual" },
+      { text: "Author drops out during production → course cancelled or reassigned", who: "Producer + Manager", type: "manual" },
+      { text: "Course Cancellation Process initiated if applicable", who: "Producer + Manager", type: "manual" },
+      { text: "Card archived in Monday; Expert record updated", who: "Producer", type: "manual" },
     ],
   },
 ];
@@ -202,10 +231,13 @@ function getRoleCategory(who) {
   return "madecraft";
 }
 
-export default function AGCLifecycle() {
+export default function AGCLifecycle({ authors = [], stages = [] }) {
   const [view, setView] = useState("flowchart");
   const [expandedPhase, setExpandedPhase] = useState(null);
   const [filter, setFilter] = useState("all");
+
+  const authorCountForPhase = (phaseId) =>
+    authors.filter((a) => a.stage === phaseId).length;
 
   const totalSteps    = phases.reduce((s, p) => s + p.steps.length, 0);
   const manualSteps   = phases.reduce((s, p) => s + p.steps.filter(x => x.type === "manual").length, 0);
@@ -347,6 +379,7 @@ export default function AGCLifecycle() {
         {visible.map((phase, pi) => {
           const isOpen = expandedPhase === phase.id;
           const autoPct = Math.round(phase.steps.filter(s => s.type !== "manual").length / phase.steps.length * 100);
+          const authorCount = authorCountForPhase(phase.id);
 
           return (
             <div key={phase.id}>
@@ -379,13 +412,32 @@ export default function AGCLifecycle() {
 
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ fontWeight: 700, fontSize: 14, color: "var(--text-primary)", letterSpacing: "-0.1px" }}>{phase.label}</div>
-                  <div style={{ fontSize: 11, color: "var(--text-muted)", marginTop: 3 }}>
-                    {phase.steps.length} steps &middot; {phase.steps.filter(s => s.type === "manual").length} manual &middot; {phase.steps.filter(s => s.type !== "manual").length} auto/semi
+                  <div style={{ fontSize: 11, color: "var(--text-muted)", marginTop: 3, display: "flex", gap: 10, flexWrap: "wrap", alignItems: "center" }}>
+                    <span>{phase.steps.length} steps &middot; {phase.steps.filter(s => s.type === "manual").length} manual &middot; {phase.steps.filter(s => s.type !== "manual").length} auto/semi</span>
+                    {phase.monday && phase.monday !== "N/A" && (
+                      <span style={{ color: "var(--text-muted)", opacity: 0.6 }}>Monday: {phase.monday}</span>
+                    )}
                   </div>
                 </div>
 
+                {/* Author count badge */}
+                <div style={{
+                  display: "flex", flexDirection: "column", alignItems: "center",
+                  padding: "4px 12px", borderRadius: 8, flexShrink: 0,
+                  background: authorCount > 0 ? `${phase.color}18` : "var(--bg-surface)",
+                  border: `1px solid ${authorCount > 0 ? phase.color + "40" : "var(--border)"}`,
+                  minWidth: 52,
+                }}>
+                  <span style={{ fontFamily: "monospace", fontSize: 20, fontWeight: 700, color: authorCount > 0 ? phase.color : "var(--text-muted)", lineHeight: 1 }}>
+                    {authorCount}
+                  </span>
+                  <span style={{ fontSize: 9, color: "var(--text-muted)", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.06em", marginTop: 2 }}>
+                    {authorCount === 1 ? "author" : "authors"}
+                  </span>
+                </div>
+
                 <div style={{ display: "flex", alignItems: "center", gap: 8, flexShrink: 0 }}>
-                  <div style={{ width: 96, height: 4, borderRadius: 2, background: "var(--border)", overflow: "hidden" }}>
+                  <div style={{ width: 80, height: 4, borderRadius: 2, background: "var(--border)", overflow: "hidden" }}>
                     <div style={{ width: `${autoPct}%`, height: "100%", background: "var(--accent-teal)", borderRadius: 2 }} />
                   </div>
                   <span style={{ fontFamily: "monospace", fontSize: 11, color: "var(--text-muted)", width: 32, textAlign: "right" }}>{autoPct}%</span>
@@ -404,10 +456,12 @@ export default function AGCLifecycle() {
                   {phase.steps.map((step, si) => {
                     const cfg = typeConfig[step.type];
                     const role = getRoleCategory(step.who);
+                    const isExit = !!step.exit;
                     return (
                       <div key={si} style={{
                         display: "flex", gap: 14, padding: "12px 20px",
                         borderBottom: si < phase.steps.length - 1 ? "1px solid var(--border)" : "none",
+                        background: isExit ? "rgba(169,38,15,0.04)" : "transparent",
                       }}>
                         <div style={{ display: "flex", flexDirection: "column", alignItems: "center", paddingTop: 4, flexShrink: 0, width: 16 }}>
                           <div style={{
@@ -438,6 +492,13 @@ export default function AGCLifecycle() {
                               color: role === "author" ? "var(--accent-blue)" : role === "system" ? "var(--accent-teal)" : "var(--accent-plum)",
                               border: `1px solid ${role === "author" ? "rgba(26,143,184,0.25)" : role === "system" ? "rgba(9,166,133,0.25)" : "rgba(99,64,87,0.25)"}`,
                             }}>{step.who}</span>
+                            {isExit && (
+                              <span style={{
+                                fontSize: 10, fontWeight: 700, padding: "2px 8px", borderRadius: 4,
+                                background: "rgba(169,38,15,0.1)", border: "1px solid rgba(169,38,15,0.3)",
+                                color: "#A9260F", letterSpacing: "0.04em",
+                              }}>EXIT PATH</span>
+                            )}
                           </div>
                         </div>
                       </div>
@@ -484,6 +545,10 @@ export default function AGCLifecycle() {
               <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                 <div style={{ width: 9, height: 9, borderRadius: 2, transform: "rotate(45deg)", background: "var(--text-muted)" }} />
                 <span style={{ fontSize: 12, color: "var(--text-body)" }}>Decision point</span>
+              </div>
+              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                <div style={{ width: 9, height: 9, borderRadius: 2, background: "#A9260F" }} />
+                <span style={{ fontSize: 12, color: "var(--text-body)" }}>Exit path (Offboarding/Sunset)</span>
               </div>
             </div>
           </div>
